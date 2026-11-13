@@ -1,6 +1,4 @@
 extends CharacterBody2D
-## Top-down 2D Astronaut controller.
-## Supports WASD/Arrow keys, on-screen touch D-pad, cursor click-to-move/click-facility, and E to interact.
 
 @export var walk_speed: float = 240.0
 
@@ -107,4 +105,3 @@ func walk_to_point(world_pos: Vector2, target_facility: Area2D = null) -> void:
 	click_target_pos = world_pos
 	pending_facility = target_facility
 	has_click_target = true
-

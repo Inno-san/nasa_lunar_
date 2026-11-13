@@ -14,7 +14,6 @@ size = Vector2(24, 530)
 
 [node name="LunarBase" type="Node2D" unique_id=252617055]
 script = ExtResource("1_base")
-metadata/_edit_horizontal_guides_ = [721.0]
 
 [node name="RegolithBackground" type="ColorRect" parent="." unique_id=954658743]
 offset_right = 1280.0

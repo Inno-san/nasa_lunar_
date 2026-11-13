@@ -1,11 +1,10 @@
 class_name StormOverlay
 extends Control
 ## Storm phase screens: (1) a card with the linked NASA record, (2) a countdown banner
-## while the player runs to the Radiation Shelter and starts the lockdown.
+## with a one-click button to rush into the Radiation Shelter and lock down.
 
 signal finished(reached_shelter: bool)
 
-## Set by the base scene: returns true when the astronaut is standing in the shelter.
 var in_shelter: Callable = func() -> bool: return false
 
 var _active: bool = false
@@ -45,7 +44,7 @@ func begin(info: Dictionary) -> void:
 	var box: VBoxContainer = parts[1]
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 8)
-	head.add_child(UiKit.label("SOLAR STORM ALERT!  Day %d" % int(info.get("day", 0)), UiKit.FONT_TITLE, UiKit.COLOR_BAD, false))
+	head.add_child(UiKit.label("🚨 SOLAR STORM ALERT! (Day %d)" % int(info.get("day", 0)), UiKit.FONT_TITLE, UiKit.COLOR_BAD, false))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(spacer)
@@ -54,13 +53,13 @@ func begin(info: Dictionary) -> void:
 	box.add_child(head)
 	var warned := bool(info.get("warned", false))
 	box.add_child(UiKit.label(
-		"Mission Control warned you about this storm." if warned else "Surprise! No warning arrived in time.",
+		"Mission Control warned you about this storm, so you have extra time!" if warned else "Surprise storm! Get to the purple Radiation Shelter fast!",
 		UiKit.FONT_BODY, UiKit.COLOR_WARN))
 	box.add_child(FactCard.make_storm(info))
 	box.add_child(UiKit.label(
-		"Run to the Radiation Shelter, open it and press START LOCKDOWN. You have %d seconds. The timer starts when you press Go." % int(_total),
+		"Run to the purple Radiation Shelter (bottom middle) or click the big button on the timer to hide inside!",
 		UiKit.FONT_BODY))
-	var go := UiKit.button("Go! (%d seconds)" % int(_total), UiKit.FONT_TITLE, Vector2(0, 60))
+	var go := UiKit.button("Start Timer & Run to Shelter! ▶", UiKit.FONT_TITLE, Vector2(0, 60))
 	go.pressed.connect(_start_countdown)
 	box.add_child(go)
 	add_child(_intro)
@@ -80,30 +79,29 @@ func _build_banner() -> void:
 	_banner = PanelContainer.new()
 	_banner.anchor_left = 0.5
 	_banner.anchor_right = 0.5
-	_banner.offset_left = -330.0
-	_banner.offset_right = 330.0
-	_banner.offset_top = 112.0
-	_banner.offset_bottom = 210.0
-	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner.offset_left = -350.0
+	_banner.offset_right = 350.0
+	_banner.offset_top = 118.0
+	_banner.offset_bottom = 250.0
 	_banner.add_theme_stylebox_override("panel", UiKit.panel_style(Color(0.35, 0.05, 0.05, 0.96), Color(1, 0.7, 0.4, 1), 12))
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
+	box.add_theme_constant_override("separation", 6)
 	_banner.add_child(box)
 	_time_label = UiKit.label("", UiKit.FONT_TITLE, UiKit.COLOR_TEXT, false)
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_time_label)
 	_bar = ProgressBar.new()
 	_bar.show_percentage = false
-	_bar.custom_minimum_size = Vector2(0, 18)
+	_bar.custom_minimum_size = Vector2(0, 16)
 	box.add_child(_bar)
-	var hint := UiKit.label("Run to the Radiation Shelter (bottom middle) and press START LOCKDOWN.", UiKit.FONT_SMALL, UiKit.COLOR_MUTED)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(hint)
+	var rush_btn := UiKit.button("🏃 RUSH TO RADIATION SHELTER & LOCK DOWN NOW!", 18, Vector2(0, 46))
+	rush_btn.pressed.connect(lockdown_now)
+	box.add_child(rush_btn)
 	add_child(_banner)
 
 
 func _update_banner() -> void:
-	_time_label.text = "STORM!  %d seconds left" % ceili(_time_left)
+	_time_label.text = "SOLAR STORM!  %d seconds left" % ceili(_time_left)
 	_bar.max_value = _total
 	_bar.value = _time_left
 
@@ -113,13 +111,11 @@ func _process(delta: float) -> void:
 		return
 	_time_left -= delta
 	if _time_left <= 0.0:
-		# If the astronaut is standing in the shelter when time is up, the lockdown starts automatically.
 		_finish(bool(in_shelter.call()))
 		return
 	_update_banner()
 
 
-## Called when the player presses START LOCKDOWN at the shelter.
 func lockdown_now() -> void:
 	if _counting:
 		_finish(true)
@@ -131,4 +127,3 @@ func _finish(reached_shelter: bool) -> void:
 	_banner.visible = false
 	AudioManager.stop_alarm()
 	finished.emit(reached_shelter)
-

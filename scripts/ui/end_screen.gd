@@ -1,6 +1,6 @@
 class_name EndScreen
 extends Control
-## Mission end screen showing win/loss, star rating (1-3), final meters, science score,
+## Mission end screen showing win/loss, star rating (1-3), visual meter words,
 ## "What went wrong" replay hints, and a non-repeating OSDR fact card.
 
 signal play_again_requested
@@ -24,7 +24,7 @@ func show_end_screen() -> void:
 	var box: VBoxContainer = parts[1]
 	box.add_theme_constant_override("separation", 10)
 
-	var title_text := "MISSION COMPLETE — YOU SURVIVED 10 DAYS!" if won else "MISSION ENDED — TRY AGAIN!"
+	var title_text := "🎉 MISSION COMPLETE — YOU SURVIVED 10 DAYS!" if won else "MISSION ENDED — LET'S TRY AGAIN!"
 	var title_color := UiKit.COLOR_GOOD if won else UiKit.COLOR_BAD
 	box.add_child(UiKit.label(title_text, UiKit.FONT_TITLE, title_color))
 
@@ -32,17 +32,19 @@ func show_end_screen() -> void:
 	var star_icons := ""
 	for i in range(3):
 		star_icons += "★ " if i < stars else "☆ "
-	var star_line := "Rating: %s (%d / 3 Stars)" % [star_icons.strip_edges(), stars] if won else "Rating: ☆ ☆ ☆ (0 / 3 Stars — Crew Health needed: %d+)" % int(Rules.win_data().get("min_health", 0))
+	var star_line := "Your Rating: %s (%d of 3 Stars)" % [star_icons.strip_edges(), stars] if won else "Your Rating: ☆ ☆ ☆ (Keep Crew Health Good through Day 10 to win!)"
 	box.add_child(UiKit.label(star_line, UiKit.FONT_BODY, UiKit.COLOR_WARN))
 
-	var meters_summary := "Final Meters — Health: %d/%d  |  Science: %d  |  Battery: %d  |  Oxygen: %d  |  Food: %d  |  Water: %d  |  Shield: Lvl %d" % [
-		GameState.health, Rules.max_value("health"),
-		GameState.science,
-		GameState.battery,
-		GameState.oxygen,
-		GameState.food,
-		GameState.water,
-		GameState.shield,
+	var sh_stars := ""
+	for i in range(Rules.max_value("shield")):
+		sh_stars += "★" if i < GameState.shield else "☆"
+	var meters_summary := "Final Base Check — Health: %s  |  Battery: %s  |  Oxygen: %s  |  Food: %s  |  Water: %s  |  Shield: %s" % [
+		GameState.meter_word("health"),
+		GameState.meter_word("battery"),
+		GameState.meter_word("oxygen"),
+		GameState.meter_word("food"),
+		GameState.meter_word("water"),
+		sh_stars,
 	]
 	box.add_child(UiKit.label(meters_summary, UiKit.FONT_BODY))
 
@@ -56,7 +58,7 @@ func show_end_screen() -> void:
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(body)
 
-	var hints_heading := "How to get all 3 stars next time:" if (won and stars < 3) else ("What went wrong (and tips for next time):" if not won else "Mission highlights:")
+	var hints_heading := "Tips to earn all 3 Stars next time:" if (won and stars < 3) else ("What went wrong (and tips for next time):" if not won else "Awesome job, Commander!")
 	body.add_child(UiKit.label(hints_heading, UiKit.FONT_BODY, UiKit.COLOR_WARN))
 	for hint in ReplayHints.build():
 		body.add_child(UiKit.label("• " + hint, UiKit.FONT_SMALL))

@@ -78,3 +78,4 @@ Below is the step-by-step checklist for both automated and manual verification a
   - [x] **Non-color status indicators** (`[LOW]` and `[!]`) appear on HUD meter chips when resources drop low, and star ratings show both `★/☆` symbols and numeric text (`3 / 3 Stars`).
   - [x] **Sound Mute toggle** (`Sound: ON` / `Sound: MUTED`) works on both the Main Menu and HUD.
 - **Status:** **PASS** (Verified in headless test suite and single-threaded Web export configuration).
+

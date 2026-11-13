@@ -87,3 +87,4 @@ Then open `http://localhost:8000` in Chrome, Firefox, or Safari.
      - **Fullscreen button**
    - Leave **SharedArrayBuffer support** unchecked (not needed for single-threaded builds).
 3. Click **Save & view page** to play in the browser.
+

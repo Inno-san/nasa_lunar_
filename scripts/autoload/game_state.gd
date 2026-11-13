@@ -118,6 +118,95 @@ func storm_size_word(severity: int) -> String:
 	return ["small", "medium", "big"][clampi(severity, 1, 3) - 1]
 
 
+## Human-friendly word for how full a meter is (no numbers needed).
+func meter_word(key: String) -> String:
+	var val := int(get(key))
+	var max_v := battery_max() if key == "battery" else Rules.max_value(key)
+	if val <= 0:
+		return "EMPTY!"
+	var ratio := float(val) / float(maxi(1, max_v))
+	if ratio >= 0.8:
+		return "Full"
+	if ratio >= 0.5:
+		return "Good"
+	if ratio >= 0.28:
+		return "Okay"
+	return "LOW!"
+
+
+## Predicts whether a meter will go up, stay steady, or go down at end of day, so the player never has to calculate.
+func meter_trend(key: String) -> String:
+	match key:
+		"battery":
+			var dust := solar_penalty_amount if solar_penalty_days > 0 else 0
+			var solar := maxi(0, Rules.power_solar() - dust)
+			var cost := Rules.power_base_load() + _get_ls_cost(life_support_mode) \
+				+ shield * Rules.shield_upkeep_per_level() \
+				+ int(Rules.greenhouse_mode_data(greenhouse_mode).get("cost", 0))
+			var net := solar - cost
+			if net > 0:
+				return "▲ Going up"
+			if net < 0:
+				return "▼ Going down"
+			return "● Steady"
+		"oxygen":
+			var leak := oxygen_leak_amount if oxygen_leak_days > 0 else 0
+			var net := _get_ls_o2(life_support_mode) - Rules.consumption_oxygen() - leak
+			if net > 0:
+				return "▲ Going up"
+			if net < 0:
+				return "▼ Going down"
+			return "● Steady"
+		"food":
+			var arriving := int(food_crates.get(day, 0))
+			var net := arriving - Rules.consumption_food()
+			if net > 0:
+				return "▲ Going up"
+			if net < 0:
+				return "▼ Going down"
+			return "● Steady"
+		"water":
+			var net := Rules.water_recycle() - int(Rules.greenhouse_mode_data(greenhouse_mode).get("water", 0))
+			if net > 0:
+				return "▲ Going up"
+			if net < 0:
+				return "▼ Going down"
+			return "● Steady"
+		"health":
+			if oxygen <= 0 or food <= 0:
+				return "▼ Danger!"
+			return "▲ Safe"
+	return ""
+
+
+## Visual dots for Actions Left today (e.g. "● ● ● ● ○ ○").
+func ap_dots() -> String:
+	var max_ap := Rules.ap_per_day()
+	var dots: Array[String] = []
+	for i in range(max_ap):
+		dots.append("●" if i < ap else "○")
+	return " ".join(dots)
+
+
+## One-sentence helper coach that tells the player what to do next without any math.
+func coach_hint() -> String:
+	if phase == PHASE_STORM:
+		return "🚨 SOLAR STORM! Click the purple Radiation Shelter (bottom middle) and press HIDE IN SHELTER!"
+	if oxygen < 35 or meter_trend("oxygen") == "▼ Going down":
+		return "💡 Coach Tip: Oxygen is dropping! Click Life Support (top right) and set it to Normal or High."
+	if food < 25 and history["resupply_days"].is_empty() and day <= int(Rules.comms_data().get("resupply", {}).get("send_by_day", 6)):
+		return "💡 Coach Tip: Food is getting low! Visit the Communications Room (bottom right) to call a Food Supply Rocket."
+	if day in [2, 6, 8] and not history["forecast_days"].has(day) and ap >= 1 and not comms_blocked_today:
+		return "💡 Coach Tip: Visit the Communications Room (bottom right) and Ask Earth for a Storm Forecast!"
+	if shield < Rules.max_value("shield") and ap >= 2 and battery >= 30:
+		return "💡 Coach Tip: You have spare energy! Visit the purple Radiation Shelter to Upgrade your Shield."
+	if science < int(Rules.win_data().get("three_stars_science", 30)) and ap >= 2 and battery >= 40:
+		return "💡 Coach Tip: Want 3 Stars? Visit the yellow Power Station to Do a Science Experiment!"
+	if ap == 0:
+		return "✅ You used all your Actions for today! Click 'Next Day >>' at the top right."
+	return "✅ All systems look healthy! Explore the 5 rooms or click 'Next Day >>' when you are ready."
+
+
 # ---------------------------------------------------------------- actions
 
 func get_action_cost(action_id: String, param: Variant = null) -> Dictionary:
@@ -153,11 +242,11 @@ func can_try_action(action_id: String, param: Variant = null) -> Dictionary:
 
 	var missing: Array[String] = []
 	if ap < int(info["ap"]):
-		missing.append("needs %d AP (you have %d)" % [info["ap"], ap])
+		missing.append("not enough Actions left today")
 	if battery < int(info["power"]):
-		missing.append("needs %d power (you have %d)" % [info["power"], battery])
+		missing.append("Battery is too low")
 	if not missing.is_empty():
-		return {"ok": false, "reason": ", ".join(missing)}
+		return {"ok": false, "reason": " and ".join(missing)}
 
 	match base_id:
 		"set_life_support":

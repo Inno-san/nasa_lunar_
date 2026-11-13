@@ -1,5 +1,5 @@
 extends Control
-## Top HUD, glossary bar, audio mute toggle, and bottom status/touch bar.
+## Visual, zero-math Top HUD with progress bars, trend arrows, Action dots, and a live Coach Tip bar.
 ## Listens to GameState.state_changed and never caches game values locally.
 
 signal touch_move_changed(direction: Vector2)
@@ -8,20 +8,16 @@ signal interact_pressed
 var top_bar: PanelContainer
 var day_label: Label
 var ap_label: Label
-var battery_label: Label
-var oxygen_label: Label
-var food_label: Label
-var water_label: Label
-var health_label: Label
 var shield_label: Label
 var science_label: Label
-var modes_label: Label
+var coach_label: Label
 var log_label: RichTextLabel
 var end_day_button: Button
 var mute_button: Button
 var day5_test_button: Button
 var reset_button: Button
 
+var meter_widgets: Dictionary = {}
 var dpad_state := {"up": false, "down": false, "left": false, "right": false}
 
 
@@ -37,15 +33,15 @@ func _ready() -> void:
 func _build_ui() -> void:
 	top_bar = PanelContainer.new()
 	top_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	top_bar.offset_bottom = 104.0
+	top_bar.offset_bottom = 114.0
 	var top_style := StyleBoxFlat.new()
 	top_style.bg_color = Color(0.06, 0.09, 0.15, 0.96)
 	top_style.border_width_bottom = 3
 	top_style.border_color = Color(0.32, 0.56, 0.85, 1.0)
 	top_style.content_margin_left = 12
 	top_style.content_margin_right = 12
-	top_style.content_margin_top = 8
-	top_style.content_margin_bottom = 8
+	top_style.content_margin_top = 6
+	top_style.content_margin_bottom = 6
 	top_bar.add_theme_stylebox_override("panel", top_style)
 	add_child(top_bar)
 
@@ -53,104 +49,93 @@ func _build_ui() -> void:
 	vbox.add_theme_constant_override("separation", 6)
 	top_bar.add_child(vbox)
 
-	# Row 1: Meters + End Day
+	# Row 1: Visual Meter Bars + Next Day Button
 	var row1 := HBoxContainer.new()
 	row1.add_theme_constant_override("separation", 8)
 	vbox.add_child(row1)
 
-	day_label = _make_stat_chip(row1, "Day", "Current mission day out of 10. Survive all 10 days!", Color(0.98, 0.88, 0.4), "")
-	ap_label = _make_stat_chip(row1, "AP", "Action Points (AP) left today. Walking is free; console tasks use AP.", Color(0.55, 0.9, 1.0), "")
-	battery_label = _make_stat_chip(row1, "Battery", Explain.term_text("battery"), Color(1.0, 0.82, 0.3), "battery")
-	oxygen_label = _make_stat_chip(row1, "Oxygen", Explain.term_text("oxygen"), Color(0.5, 0.95, 0.98), "oxygen")
-	food_label = _make_stat_chip(row1, "Food", Explain.term_text("greenhouse"), Color(0.6, 0.95, 0.55), "greenhouse")
-	water_label = _make_stat_chip(row1, "Water", "Clean water for plants and crew. Recycled daily (+2/day).", Color(0.5, 0.78, 1.0), "")
-	health_label = _make_stat_chip(row1, "Health", "Crew well-being! Keep at 50 or above by Day 10 to win.", Color(1.0, 0.58, 0.6), "")
-	shield_label = _make_stat_chip(row1, "Shield", Explain.term_text("shielding"), Color(0.82, 0.68, 1.0), "shielding")
-	science_label = _make_stat_chip(row1, "Science", "Science points earned from experiments (30+ needed for 3 stars).", Color(0.96, 0.74, 0.96), "")
+	day_label = _make_badge(row1, "Day 1", Color(0.98, 0.88, 0.4), "")
+	ap_label = _make_badge(row1, "Actions: ●●●●●●", Color(0.55, 0.9, 1.0), "")
+
+	meter_widgets["battery"] = _make_bar_meter(row1, "Battery", Color(1.0, 0.82, 0.28), "battery")
+	meter_widgets["oxygen"] = _make_bar_meter(row1, "Oxygen", Color(0.45, 0.92, 0.98), "oxygen")
+	meter_widgets["food"] = _make_bar_meter(row1, "Food", Color(0.55, 0.92, 0.52), "greenhouse")
+	meter_widgets["water"] = _make_bar_meter(row1, "Water", Color(0.48, 0.76, 1.0), "")
+	meter_widgets["health"] = _make_bar_meter(row1, "Health", Color(1.0, 0.56, 0.6), "")
+
+	shield_label = _make_badge(row1, "Shield: ★☆☆", Color(0.84, 0.7, 1.0), "shielding")
+	science_label = _make_badge(row1, "Science: ☆☆☆", Color(0.96, 0.74, 0.96), "")
 
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row1.add_child(spacer)
 
 	end_day_button = Button.new()
-	end_day_button.text = "End Day >>"
-	end_day_button.tooltip_text = "Finish today and run the daily power, oxygen, food, water, and health checks."
-	end_day_button.custom_minimum_size = Vector2(130, 38)
-	end_day_button.add_theme_font_size_override("font_size", 16)
+	end_day_button.text = "Next Day >>"
+	end_day_button.tooltip_text = "Finish today and sleep until tomorrow."
+	end_day_button.custom_minimum_size = Vector2(138, 48)
+	end_day_button.add_theme_font_size_override("font_size", 17)
 	end_day_button.pressed.connect(_on_end_day_pressed)
 	row1.add_child(end_day_button)
 
-	# Row 2: Active modes, Tap-to-Explain term buttons, Sound toggle, Debug test
+	# Row 2: Live Coach Hint (no math!) + Word Explainer + Sound toggle
 	var row2 := HBoxContainer.new()
 	row2.add_theme_constant_override("separation", 8)
 	vbox.add_child(row2)
 
-	modes_label = Label.new()
-	modes_label.add_theme_font_size_override("font_size", 14)
-	modes_label.add_theme_color_override("font_color", Color(0.88, 0.93, 1.0))
-	row2.add_child(modes_label)
-
-	var explain_lbl := Label.new()
-	explain_lbl.text = "  |  Tap to explain:"
-	explain_lbl.add_theme_font_size_override("font_size", 13)
-	explain_lbl.add_theme_color_override("font_color", Color(0.95, 0.85, 0.45))
-	row2.add_child(explain_lbl)
+	coach_label = Label.new()
+	coach_label.add_theme_font_size_override("font_size", 15)
+	coach_label.add_theme_color_override("font_color", Color(0.98, 0.92, 0.58))
+	coach_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row2.add_child(coach_label)
 
 	for term_pair in [
 		["solar_storm", "Solar Storm?"],
 		["radiation", "Radiation?"],
-		["shielding", "Shielding?"],
-		["comm_delay", "Comms Delay?"],
+		["comm_delay", "Earth Delay?"],
 	]:
 		var tbtn := Button.new()
 		tbtn.text = term_pair[1]
-		tbtn.tooltip_text = Explain.term_text(term_pair[0])
 		tbtn.add_theme_font_size_override("font_size", 13)
 		tbtn.pressed.connect(Explain.show_term.bind(term_pair[0]))
 		row2.add_child(tbtn)
 
-	var spacer2 := Control.new()
-	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row2.add_child(spacer2)
-
 	mute_button = Button.new()
 	mute_button.text = "Sound: ON"
-	mute_button.tooltip_text = "Toggle game sound effects on or off."
 	mute_button.add_theme_font_size_override("font_size", 13)
 	mute_button.pressed.connect(func() -> void: AudioManager.toggle_mute())
 	row2.add_child(mute_button)
 
 	day5_test_button = Button.new()
 	day5_test_button.text = "Day-5 Test"
-	day5_test_button.tooltip_text = "Reproduce the Day-5 worked example from docs/game_mechanics.md."
-	day5_test_button.add_theme_font_size_override("font_size", 13)
+	day5_test_button.tooltip_text = "Verify the Day-5 test from docs/game_mechanics.md."
+	day5_test_button.add_theme_font_size_override("font_size", 12)
 	day5_test_button.pressed.connect(_on_day5_test_pressed)
 	row2.add_child(day5_test_button)
 
 	reset_button = Button.new()
 	reset_button.text = "Menu"
-	reset_button.tooltip_text = "Return to the Start Menu."
 	reset_button.add_theme_font_size_override("font_size", 13)
 	reset_button.pressed.connect(_on_menu_pressed)
 	row2.add_child(reset_button)
 
-	# Bottom log panel
+	# Bottom plain-language story log
 	var bottom_panel := PanelContainer.new()
 	bottom_panel.anchor_left = 0.16
 	bottom_panel.anchor_right = 0.84
 	bottom_panel.anchor_top = 1.0
 	bottom_panel.anchor_bottom = 1.0
-	bottom_panel.offset_top = -92.0
+	bottom_panel.offset_top = -78.0
 	bottom_panel.offset_bottom = -8.0
 	var bot_style := StyleBoxFlat.new()
-	bot_style.bg_color = Color(0.06, 0.09, 0.14, 0.92)
+	bot_style.bg_color = Color(0.06, 0.09, 0.14, 0.9)
 	bot_style.set_border_width_all(2)
 	bot_style.border_color = Color(0.28, 0.48, 0.72, 0.95)
 	bot_style.set_corner_radius_all(6)
 	bot_style.content_margin_left = 12
 	bot_style.content_margin_right = 12
-	bot_style.content_margin_top = 6
-	bot_style.content_margin_bottom = 6
+	bot_style.content_margin_top = 5
+	bot_style.content_margin_bottom = 5
 	bottom_panel.add_theme_stylebox_override("panel", bot_style)
 	add_child(bottom_panel)
 
@@ -163,53 +148,79 @@ func _build_ui() -> void:
 	_build_touch_controls()
 
 
-func _make_stat_chip(parent: Container, title: String, tip: String, color: Color, term_id: String) -> Label:
-	var btn := Button.new()
-	btn.tooltip_text = tip + (" (Click to explain)" if term_id != "" else "")
-	btn.flat = false
+func _make_badge(parent: Container, text_str: String, color: Color, term_id: String) -> Label:
+	var panel := PanelContainer.new()
 	var st := StyleBoxFlat.new()
 	st.bg_color = Color(0.12, 0.17, 0.25, 1.0)
 	st.border_width_bottom = 3
 	st.border_color = color
-	st.set_corner_radius_all(4)
-	st.content_margin_left = 7
-	st.content_margin_right = 7
+	st.set_corner_radius_all(5)
+	st.content_margin_left = 8
+	st.content_margin_right = 8
 	st.content_margin_top = 4
 	st.content_margin_bottom = 4
-	btn.add_theme_stylebox_override("normal", st)
-	btn.add_theme_stylebox_override("hover", st)
+	panel.add_theme_stylebox_override("panel", st)
 	if term_id != "":
-		btn.pressed.connect(Explain.show_term.bind(term_id))
-	parent.add_child(btn)
+		panel.gui_input.connect(func(ev: InputEvent) -> void:
+			if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT and ev.pressed:
+				Explain.show_term(term_id)
+		)
+	parent.add_child(panel)
 
 	var lbl := Label.new()
-	lbl.text = title
-	lbl.add_theme_font_size_override("font_size", 15)
+	lbl.text = text_str
+	lbl.add_theme_font_size_override("font_size", 14)
 	lbl.add_theme_color_override("font_color", color)
-	btn.custom_minimum_size = Vector2(96, 34)
-	btn.text = title
-	btn.add_theme_font_size_override("font_size", 14)
-	btn.add_theme_color_override("font_color", color)
-	# Return a proxy label or use the button itself by keeping a child hidden label synced:
-	lbl.visible = false
-	btn.add_child(lbl)
-	lbl.set_meta("chip_btn", btn)
+	panel.add_child(lbl)
 	return lbl
 
 
-func _set_chip_text(lbl: Label, text_val: String) -> void:
-	lbl.text = text_val
-	var btn: Button = lbl.get_meta("chip_btn", null)
-	if btn != null:
-		btn.text = text_val
+func _make_bar_meter(parent: Container, title: String, color: Color, term_id: String) -> Dictionary:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(128, 48)
+	var st := StyleBoxFlat.new()
+	st.bg_color = Color(0.11, 0.16, 0.24, 1.0)
+	st.border_width_bottom = 3
+	st.border_color = color
+	st.set_corner_radius_all(5)
+	st.content_margin_left = 7
+	st.content_margin_right = 7
+	st.content_margin_top = 3
+	st.content_margin_bottom = 3
+	panel.add_theme_stylebox_override("panel", st)
+	if term_id != "":
+		panel.tooltip_text = "Click to learn about " + title
+		panel.gui_input.connect(func(ev: InputEvent) -> void:
+			if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT and ev.pressed:
+				Explain.show_term(term_id)
+		)
+	parent.add_child(panel)
 
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	panel.add_child(box)
 
-func _status_tag(val: int, max_val: int) -> String:
-	if val <= 0:
-		return " [!]"
-	if val <= int(max_val * 0.25):
-		return " [LOW]"
-	return ""
+	var top_lbl := Label.new()
+	top_lbl.text = title
+	top_lbl.add_theme_font_size_override("font_size", 13)
+	top_lbl.add_theme_color_override("font_color", color)
+	box.add_child(top_lbl)
+
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(110, 12)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = color
+	fill.set_corner_radius_all(3)
+	bar.add_theme_stylebox_override("fill", fill)
+	box.add_child(bar)
+
+	var trend_lbl := Label.new()
+	trend_lbl.add_theme_font_size_override("font_size", 12)
+	trend_lbl.add_theme_color_override("font_color", Color(0.86, 0.92, 0.98))
+	box.add_child(trend_lbl)
+
+	return {"title": title, "top": top_lbl, "bar": bar, "trend": trend_lbl, "fill": fill, "base_color": color}
 
 
 func _build_touch_controls() -> void:
@@ -219,9 +230,9 @@ func _build_touch_controls() -> void:
 	dpad.anchor_top = 1.0
 	dpad.anchor_bottom = 1.0
 	dpad.offset_left = 14.0
-	dpad.offset_top = -140.0
+	dpad.offset_top = -136.0
 	dpad.offset_right = 164.0
-	dpad.offset_bottom = -10.0
+	dpad.offset_bottom = -8.0
 	dpad.add_theme_constant_override("h_separation", 4)
 	dpad.add_theme_constant_override("v_separation", 4)
 	add_child(dpad)
@@ -234,7 +245,7 @@ func _build_touch_controls() -> void:
 	_add_dpad_btn(dpad, "▶", "right")
 
 	var use_btn := Button.new()
-	use_btn.text = "Use Room\n[E]"
+	use_btn.text = "Open Room\n[E]"
 	use_btn.add_theme_font_size_override("font_size", 15)
 	use_btn.anchor_left = 1.0
 	use_btn.anchor_right = 1.0
@@ -242,8 +253,8 @@ func _build_touch_controls() -> void:
 	use_btn.anchor_bottom = 1.0
 	use_btn.offset_left = -168.0
 	use_btn.offset_right = -16.0
-	use_btn.offset_top = -88.0
-	use_btn.offset_bottom = -12.0
+	use_btn.offset_top = -84.0
+	use_btn.offset_bottom = -10.0
 	use_btn.pressed.connect(func() -> void: interact_pressed.emit())
 	add_child(use_btn)
 
@@ -252,7 +263,7 @@ func _add_dpad_btn(parent: Container, text_str: String, dir_key: String) -> void
 	var btn := Button.new()
 	btn.text = text_str
 	btn.add_theme_font_size_override("font_size", 16)
-	btn.custom_minimum_size = Vector2(44, 38)
+	btn.custom_minimum_size = Vector2(44, 36)
 	btn.button_down.connect(func() -> void:
 		dpad_state[dir_key] = true
 		_emit_dpad()
@@ -283,31 +294,42 @@ func _on_mute_changed(is_muted: bool) -> void:
 
 
 func _on_game_state_changed() -> void:
-	var b_max := GameState.battery_max()
-	var o_max := Rules.max_value("oxygen")
-	var f_max := Rules.max_value("food")
-	var w_max := Rules.max_value("water")
-	var h_max := Rules.max_value("health")
+	day_label.text = "Day %d of %d" % [GameState.day, Rules.mission_days()]
+	ap_label.text = "Actions:\n" + GameState.ap_dots()
 
-	_set_chip_text(day_label, "Day %d/%d" % [GameState.day, Rules.mission_days()])
-	_set_chip_text(ap_label, "AP %d/%d" % [GameState.ap, Rules.ap_per_day()])
-	_set_chip_text(battery_label, "Bat %d/%d%s?" % [GameState.battery, b_max, _status_tag(GameState.battery, b_max)])
-	_set_chip_text(oxygen_label, "O2 %d/%d%s?" % [GameState.oxygen, o_max, _status_tag(GameState.oxygen, o_max)])
-	_set_chip_text(food_label, "Food %d/%d%s?" % [GameState.food, f_max, _status_tag(GameState.food, f_max)])
-	_set_chip_text(water_label, "Water %d/%d%s" % [GameState.water, w_max, _status_tag(GameState.water, w_max)])
-	_set_chip_text(health_label, "HP %d/%d%s" % [GameState.health, h_max, _status_tag(GameState.health, h_max)])
-	_set_chip_text(shield_label, "Shield %d/%d?" % [GameState.shield, Rules.max_value("shield")])
-	_set_chip_text(science_label, "Sci %d" % GameState.science)
+	for key in meter_widgets:
+		var w: Dictionary = meter_widgets[key]
+		var val := int(GameState.get(key))
+		var max_v := GameState.battery_max() if key == "battery" else Rules.max_value(key)
+		var bar: ProgressBar = w["bar"]
+		bar.max_value = max_v
+		bar.value = val
+		var word := GameState.meter_word(key)
+		w["top"].text = "%s: %s" % [w["title"], word]
+		w["trend"].text = GameState.meter_trend(key)
+		var fill: StyleBoxFlat = w["fill"]
+		if word in ["LOW!", "EMPTY!"]:
+			fill.bg_color = Color(1.0, 0.42, 0.42)
+		else:
+			fill.bg_color = w["base_color"]
 
-	modes_label.text = "LS: %s | GH: %s (Simplified game values)" % [
-		GameState.life_support_mode.capitalize(),
-		GameState.greenhouse_mode.capitalize(),
-	]
+	var sh_stars := ""
+	for i in range(Rules.max_value("shield")):
+		sh_stars += "★" if i < GameState.shield else "☆"
+	shield_label.text = "Shield\n" + sh_stars
 
+	var sci_goal := maxi(1, int(Rules.win_data().get("three_stars_science", 30)))
+	var sci_bars := clampi(int(round(float(GameState.science) / float(sci_goal) * 3.0)), 0, 3)
+	var sci_stars := ""
+	for i in range(3):
+		sci_stars += "★" if i < sci_bars else "☆"
+	science_label.text = "Science\n" + sci_stars
+
+	coach_label.text = GameState.coach_hint()
 	end_day_button.disabled = GameState.game_over or GameState.phase != GameState.PHASE_PLAYING
 
 	var recent_lines: Array[String] = []
-	var start_idx := maxi(0, GameState.daily_log.size() - 5)
+	var start_idx := maxi(0, GameState.daily_log.size() - 3)
 	for i in range(start_idx, GameState.daily_log.size()):
 		recent_lines.append("• " + GameState.daily_log[i])
 	log_label.text = "\n".join(recent_lines)

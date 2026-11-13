@@ -1,4 +1,160 @@
 {
-  "note": "15-20 short OSDR findings with study ID, date, link.",
-  "facts": []
+  "note": "Saved NASA OSDR data (not live). Fact cards are short, simplified summaries.",
+  "source": "NASA Open Science Data Repository (osdr.nasa.gov)",
+  "retrieved": "2026-11-13",
+  "facts": [
+    {
+      "id": "OSD-804",
+      "topic": "Bones",
+      "studied": "Mice",
+      "text": "Mice lived on the space station for 37 days. Some of their leg bones got weaker. In space, bones carry less weight.",
+      "study_title": "37-Day microgravity exposure in 16-Week female C57BL/6J mice during the NASA Rodent Research 1 mission is associated with bone loss specific to weight-bearing skeletal sites (femur and vertebrae, micro computed tomography)",
+      "date": "2025-01-29",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-804"
+    },
+    {
+      "id": "OSD-486",
+      "topic": "Bones",
+      "studied": "Mice",
+      "text": "Mice flew on the Space Shuttle for 15 days. Bone in the top of their skulls grew, even though leg bones usually get thinner.",
+      "study_title": "Fifteen days of microgravity causes growth in calvaria of mice (STS-131)",
+      "date": "2023-05-22",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-486"
+    },
+    {
+      "id": "OSD-691",
+      "topic": "Muscles",
+      "studied": "Mice",
+      "text": "Muscles get weaker in space. Scientists studied muscles of mice from the space station to learn why.",
+      "study_title": "Spaceflight increases sarcoplasmic reticulum Ca2+ leak and this cannot be counteracted with BuOE treatment (Soleus muscle from RR-18, Western Blot and ATPase Assays)",
+      "date": "2024-02-20",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-691"
+    },
+    {
+      "id": "OSD-111",
+      "topic": "Muscles",
+      "studied": "Mice",
+      "text": "Scientists checked how leg muscles of mice changed after 30 days in orbit.",
+      "study_title": "Global gene expression analysis highlights microgravity sensitive key genes in soleus and EDL of 30 days space flown mice",
+      "date": "2017-01-15",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-111"
+    },
+    {
+      "id": "OSD-342",
+      "topic": "Muscles and bones",
+      "studied": "Mice",
+      "text": "In one study, a special treatment helped mice keep more muscle and bone during spaceflight.",
+      "study_title": "Targeting myostatin/activin A protects against skeletal muscle and bone loss during spaceflight [plasma proteomics]",
+      "date": "2020-09-16",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-342"
+    },
+    {
+      "id": "OSD-575",
+      "topic": "Astronaut health",
+      "studied": "Humans",
+      "text": "Four private astronauts flew for 3 days on Inspiration4. Scientists took blood samples before and after to see how bodies react to space.",
+      "study_title": "SpaceX Inspiration4 Blood Serum Metabolic Panel and Immune/Cardiac Cytokine Arrays (Comprehensive Metabolic Panel and Multiplex)",
+      "date": "2024-05-14",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-575"
+    },
+    {
+      "id": "OSD-903",
+      "topic": "Immune system",
+      "studied": "Humans",
+      "text": "Scientists tested blood from two astronauts before and after a space trip. Some changes went back to normal after 3 months.",
+      "study_title": "Longitudinal transcriptomic and epigenetic analysis in astronauts reveals dynamic immune response to spaceflight [RNA-seq]",
+      "date": "2025-07-30",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-903"
+    },
+    {
+      "id": "OSD-751",
+      "topic": "Immune system",
+      "studied": "Mice",
+      "text": "Space can change how the body fights germs. Scientists studied brains of mice that spent 37 days on the space station.",
+      "study_title": "Effects of Space Flight on Inflammasome Activation in the Brain of Mice (Cortex; ECLIA)",
+      "date": "2025-03-10",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-751"
+    },
+    {
+      "id": "OSD-918",
+      "topic": "Astronaut health",
+      "studied": "Mice",
+      "text": "Long space trips can affect muscles, bones, the heart and the body's defences. Scientists studied mouse tissues of different ages.",
+      "study_title": "Spaceflight induces systemic effects on extracellular matrix and immune system in different age-stages - Blood data",
+      "date": "2026-02-04",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-918"
+    },
+    {
+      "id": "OSD-655",
+      "topic": "Space food",
+      "studied": "Plants",
+      "text": "Astronauts grew and harvested leafy greens on the space station. Scientists tested how light colour changes the plants.",
+      "study_title": "Pick-and-eat space crop production flight testing on the International Space Station (Elemental Analysis, ORAC, Phenolic Content)",
+      "date": "2025-12-22",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-655"
+    },
+    {
+      "id": "OSD-268",
+      "topic": "Space food",
+      "studied": "Plants",
+      "text": "Lettuce was grown on the space station. Scientists checked it on Earth to see if it was safe and healthy to eat.",
+      "study_title": "Microbiological and nutritional analysis of lettuce crops grown on the International Space Station-VEG01B",
+      "date": "2020-02-21",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-268"
+    },
+    {
+      "id": "OSD-412",
+      "topic": "Space food",
+      "studied": "Plants",
+      "text": "Scientists checked tiny living things called microbes on space-grown salad leaves to make sure the food is safe.",
+      "study_title": "Spatial characterization of microbial communities on multi-species leafy greens grown simultaneously in the Veggie vegetable production systems on the International Space Station VEG-03D",
+      "date": "2024-06-21",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-412"
+    },
+    {
+      "id": "OSD-622",
+      "topic": "Plants",
+      "studied": "Plants",
+      "text": "Scientists studied how the leaves of small wheat plants change when they grow in space.",
+      "study_title": "Microgravity effects on leaf morphology, cell structure, carbon metabolism and mRNA expression of dwarf wheat",
+      "date": "2023-12-12",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-622"
+    },
+    {
+      "id": "OSD-678",
+      "topic": "Plants",
+      "studied": "Plants",
+      "text": "Plants react to light in space. On the space station, scientists compared plants grown in light and in the dark.",
+      "study_title": "Light has a principal role in the Arabidopsis transcriptomic response to the spaceflight environment",
+      "date": "2023-12-20",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-678"
+    },
+    {
+      "id": "OSD-615",
+      "topic": "Plants",
+      "studied": "Plants",
+      "text": "Scientists studied the roots of a small plant called Arabidopsis after it grew on the space station.",
+      "study_title": "Glycome profiling and immunohistochemistry uncover changes in cell walls of Arabidopsis thaliana roots during spaceflight: Advanced Plant EXperiment (APEX) 03-1 Raw Dataset",
+      "date": "2024-07-16",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-615"
+    },
+    {
+      "id": "OSD-992",
+      "topic": "Radiation",
+      "studied": "Human cells in a lab",
+      "text": "Space radiation is made of fast, high-energy particles. In lab tests on human cells, it caused damage to DNA, the cell's instruction book.",
+      "study_title": "Space radiation induces distinct senescent phenotypes: Implications for space travel [scRNA-Seq]",
+      "date": "2025-12-09",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-992"
+    },
+    {
+      "id": "OSD-210",
+      "topic": "Radiation",
+      "studied": "Seeds",
+      "text": "Scientists sent seeds on a high-altitude flight over Antarctica to see how cosmic radiation can change them.",
+      "study_title": "Approaches for Surveying Cosmic Radiation Damage in Large Populations of Arabidopsis thaliana Seeds- an Antarctic Example",
+      "date": "2018-12-20",
+      "link": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-210"
+    }
+  ]
 }

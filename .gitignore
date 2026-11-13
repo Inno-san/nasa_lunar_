@@ -1,3 +1,12 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Lunar Outpost
+.import/
+*.translation
+export_presets.cfg
+.mono/
+data_private/
+.env
+*.key

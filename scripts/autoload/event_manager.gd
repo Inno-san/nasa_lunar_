@@ -7,8 +7,13 @@ const EVENTS_PATH := "res://data/events.json"
 var events: Array = []
 
 
-func _ready() -> void:
+func _init() -> void:
 	load_events()
+
+
+func _ready() -> void:
+	if events.is_empty():
+		load_events()
 
 
 func load_events() -> void:
@@ -61,3 +66,4 @@ func get_choice(event_id: String, choice_id: String) -> Dictionary:
 		if String(c.get("id", "")) == choice_id:
 			return c
 	return {}
+

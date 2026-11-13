@@ -94,3 +94,4 @@ func _make_tone(notes: Array, volume: float) -> AudioStreamWAV:
 	stream.stereo = false
 	stream.data = data
 	return stream
+

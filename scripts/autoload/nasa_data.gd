@@ -44,9 +44,15 @@ var _fact_cursor: int = 0
 var facts_repeated: bool = false
 
 
-func _ready() -> void:
+func _init() -> void:
 	load_all()
 	reset_run()
+
+
+func _ready() -> void:
+	if storm_records.is_empty() or facts.is_empty():
+		load_all()
+		reset_run()
 
 
 func load_all() -> void:
@@ -123,3 +129,4 @@ func storm_title(record: Dictionary) -> String:
 func fact_source_line(fact: Dictionary) -> String:
 	return "NASA OSDR study %s, released %s. Studied: %s." % [
 		fact.get("id", "?"), format_date(String(fact.get("date", ""))), fact.get("studied", "?")]
+

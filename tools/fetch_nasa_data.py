@@ -1,35 +1,62 @@
-"""Build cached NASA DONKI JSON for the game. Run locally; never commit your API key.
-Usage: NASA_API_KEY=xxx python tools/fetch_nasa_data.py
-Tries api.nasa.gov/DONKI (key) first, then the CCMC address (ccmc.gsfc.nasa.gov/DONKI/WS/get).
-Test both before the event; the CCMC path is inferred from the old kauai host format.
-"""
-import json, os, urllib.request, urllib.error
+"""Build data/donki_cached.json (saved NASA DONKI records) for the game.
 
-KEY = os.environ.get("NASA_API_KEY", "DEMO_KEY")
-SOURCES = [
-    ("https://api.nasa.gov/DONKI/{ep}?startDate={s}&endDate={e}&api_key=" + KEY),
-    "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/{ep}?startDate={s}&endDate={e}",
-]
+Run from the project root:  python3 tools/fetch_nasa_data.py
+No key is needed: DONKI is read from the CCMC address (api.nasa.gov/DONKI returned 404 when tested).
+Never commit an API key. If you ever need one, pass it as an environment variable (NASA_API_KEY).
+
+The three storms below are real May 2024 solar flares. The gameplay severity (1-3) is chosen by the
+team and is NOT a measured radiation dose.
+"""
+import datetime
+import json
+import os
+import urllib.request
+
+BASE = "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/{ep}?startDate={s}&endDate={e}"
+
+# game event id -> (DONKI flare id, severity, plain-language text for kids)
+PICKS = {
+    "storm_1": ("2024-05-07T05:58:00-FLR-001", 1,
+                "A medium-strong solar flare. A flare is a sudden flash of energy from the Sun."),
+    "storm_2": ("2024-05-10T06:27:00-FLR-001", 2,
+                "A very strong solar flare. Bursts like this can send extra radiation toward space."),
+    "storm_3": ("2024-05-14T16:46:00-FLR-001", 3,
+                "One of the strongest flares of that month. Astronauts would shelter from storms like this."),
+}
+
 
 def fetch(endpoint, start, end):
-    last = None
-    for tpl in SOURCES:
-        url = tpl.format(ep=endpoint, s=start, e=end)
-        try:
-            with urllib.request.urlopen(url, timeout=30) as r:
-                return json.load(r)
-        except (urllib.error.URLError, urllib.error.HTTPError, ValueError) as err:
-            last = err
-    raise RuntimeError(f"All DONKI sources failed for {endpoint}: {last}")
+    url = BASE.format(ep=endpoint, s=start, e=end)
+    with urllib.request.urlopen(url, timeout=60) as r:
+        return json.load(r)
 
-if __name__ == "__main__":
-    data = {
-        "note": "Saved DONKI records (not live)",
-        "SEP": fetch("SEP", "2024-01-01", "2024-12-31"),
-        "FLR": fetch("FLR", "2024-05-01", "2024-05-31"),
-        "CME": fetch("CME", "2024-05-01", "2024-05-31"),
+
+def main():
+    flares = {f["flrID"]: f for f in fetch("FLR", "2024-05-01", "2024-05-31")}
+    records = []
+    for event_id, (flr_id, severity, text) in PICKS.items():
+        f = flares[flr_id]
+        records.append({
+            "game_event": event_id,
+            "severity": severity,
+            "donki_id": f["flrID"],
+            "type": "Solar flare",
+            "flare_class": f["classType"],
+            "peak_time": f["peakTime"],
+            "link": f["link"],
+            "kid_text": text,
+        })
+    out = {
+        "note": "Saved NASA DONKI data (not live). Severity 1-3 is a game label, not a measured dose.",
+        "source": "NASA DONKI, CCMC (ccmc.gsfc.nasa.gov/DONKI)",
+        "retrieved": datetime.date.today().isoformat(),
+        "records": records,
     }
     os.makedirs("data", exist_ok=True)
-    with open("data/donki_cached.json", "w") as f:
-        json.dump(data, f, indent=1)
-    print("Saved data/donki_cached.json")
+    with open("data/donki_cached.json", "w") as fh:
+        json.dump(out, fh, indent=2)
+    print("Saved data/donki_cached.json with", len(records), "records")
+
+
+if __name__ == "__main__":
+    main()

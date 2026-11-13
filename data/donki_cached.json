@@ -1,4 +1,37 @@
 {
-  "note": "Fill via tools/fetch_nasa_data.py. Label as saved data.",
-  "records": []
+  "note": "Saved NASA DONKI data (not live). Severity 1-3 is a game label, not a measured dose.",
+  "source": "NASA DONKI, CCMC (ccmc.gsfc.nasa.gov/DONKI)",
+  "retrieved": "2026-11-13",
+  "records": [
+    {
+      "game_event": "storm_1",
+      "severity": 1,
+      "donki_id": "2024-05-07T05:58:00-FLR-001",
+      "type": "Solar flare",
+      "flare_class": "M5.1",
+      "peak_time": "2024-05-07T06:16Z",
+      "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/30498/-1",
+      "kid_text": "A medium-strong solar flare. A flare is a sudden flash of energy from the Sun."
+    },
+    {
+      "game_event": "storm_2",
+      "severity": 2,
+      "donki_id": "2024-05-10T06:27:00-FLR-001",
+      "type": "Solar flare",
+      "flare_class": "X3.9",
+      "peak_time": "2024-05-10T06:54Z",
+      "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/30666/-1",
+      "kid_text": "A very strong solar flare. Bursts like this can send extra radiation toward space."
+    },
+    {
+      "game_event": "storm_3",
+      "severity": 3,
+      "donki_id": "2024-05-14T16:46:00-FLR-001",
+      "type": "Solar flare",
+      "flare_class": "X8.7",
+      "peak_time": "2024-05-14T16:51Z",
+      "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/30849/-1",
+      "kid_text": "One of the strongest flares of that month. Astronauts would shelter from storms like this."
+    }
+  ]
 }

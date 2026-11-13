@@ -68,10 +68,10 @@ horizontal_alignment = 1
 shape = SubResource("CircleShape2D_body")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=733349617]
-zoom = Vector2(1, 1)
-limit_left = 0
-limit_top = 0
+zoom = Vector2(2, 2)
+limit_left = 1
+limit_top = 1
 limit_right = 1280
-limit_bottom = 720
+limit_bottom = 721
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0

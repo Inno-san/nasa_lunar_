@@ -97,8 +97,17 @@ func _on_touch_move_changed(direction: Vector2) -> void:
 func _on_hud_interact_pressed() -> void:
 	if dashboard_manager.visible:
 		dashboard_manager.close_dashboard()
-	else:
+		return
+	if astronaut != null and not astronaut._nearby_facilities.is_empty():
 		astronaut.interact_with_nearest()
+	else:
+		var fallback_id: String = (
+			dashboard_manager.current_facility_id
+			if dashboard_manager.current_facility_id != ""
+			else "power_station"
+		)
+		dashboard_manager.open_dashboard(fallback_id)
+		_sync_astronaut_lock()
 
 
 func _on_storm_started(info: Dictionary) -> void:

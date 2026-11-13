@@ -36,7 +36,7 @@ func _build_menu() -> void:
 
 	var bg := ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.06, 0.09, 0.16, 1.0)
+	bg.color = Color(0.04, 0.02, 0.10, 1.0)
 	add_child(bg)
 
 	var stars_decor := Label.new()
@@ -45,7 +45,7 @@ func _build_menu() -> void:
 	stars_decor.offset_bottom = 46.0
 	stars_decor.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stars_decor.add_theme_font_size_override("font_size", 15)
-	stars_decor.add_theme_color_override("font_color", Color(0.68, 0.78, 0.94, 0.85))
+	stars_decor.add_theme_color_override("font_color", Color(0.68, 0.56, 0.96, 0.9))
 	stars_decor.text = "★  NASA SPACE APPS CHALLENGE 2026 — JUNIOR ASTRONAUT MISSION TRAINER  ★"
 	add_child(stars_decor)
 
@@ -54,8 +54,8 @@ func _build_menu() -> void:
 	add_child(center)
 
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(780, 0)
-	card.add_theme_stylebox_override("panel", UiKit.panel_style())
+	card.custom_minimum_size = Vector2(820, 0)
+	card.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_BG_DEEP, UiKit.COLOR_BORDER, 14, 24, 20))
 	center.add_child(card)
 
 	var box := VBoxContainer.new()
@@ -79,7 +79,7 @@ func _build_menu() -> void:
 	btn_grid.add_theme_constant_override("separation", 12)
 	box.add_child(btn_grid)
 
-	var play_btn := UiKit.button("▶  Play Mission", 22, Vector2(210, 56))
+	var play_btn := UiKit.gold_button("▶  PLAY MISSION", 20, Vector2(210, 56))
 	play_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	play_btn.pressed.connect(_on_play_button_pressed)
 	btn_grid.add_child(play_btn)

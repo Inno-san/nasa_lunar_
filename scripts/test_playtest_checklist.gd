@@ -142,8 +142,18 @@ func _run_checks() -> void:
 	var base_scene: PackedScene = load("res://scenes/lunar_base.tscn")
 	var base_inst := base_scene.instantiate()
 	root.add_child(base_inst)
+	var dm: Control = base_inst.get_node("CanvasLayer/DashboardManager")
+	for fid in ["power_station", "life_support", "greenhouse", "radiation_shelter", "comms_room"]:
+		dm.open_dashboard(fid)
+		for ttab in ["information", "buildings", "operations", "statistics"]:
+			dm.current_top_tab = ttab
+			dm._refresh_contents()
+		dm.current_sub_tab = "glossary"
+		dm._refresh_contents()
+		dm.current_sub_tab = "controls"
+	dm.close_dashboard()
 	base_inst.free()
-	print("[PASS] 5. UI scenes (main_menu, lunar_base), 7 tap-to-explain terms, and audio mute hooks verified")
+	print("[PASS] 5. UI scenes (main_menu, lunar_base), 5-room chamfered dashboard, 7 tap-to-explain terms, and audio mute hooks verified")
 
 	print("ALL PLAYTEST CHECKLIST ITEMS PASSED!")
 	quit(0)

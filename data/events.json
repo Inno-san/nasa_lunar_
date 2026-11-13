@@ -9,27 +9,44 @@
           "id": "clean",
           "ap": 2,
           "power": 0,
-          "effect": "generation stays 36"
+          "effect": "generation stays 36",
+          "label": "Clean the panels",
+          "effects": {
+            "clear_solar_penalty": true
+          }
         },
         {
           "id": "ignore",
           "ap": 0,
           "power": 0,
-          "effect": "solar -8 for 3 days"
+          "effect": "solar -8 for 3 days",
+          "label": "Ignore it",
+          "effects": {
+            "solar_penalty": {
+              "amount": 8,
+              "days": 3
+            }
+          }
         },
         {
           "id": "ask",
           "ap": 1,
           "power": 4,
-          "effect": "reply arrives day 4 (too late); teaches delay"
+          "effect": "reply arrives day 4 (too late); teaches delay",
+          "label": "Ask Earth for help",
+          "effects": {
+            "reply": "Mission Control says: clean the panels! Your reply came late. Messages from Earth take time."
+          }
         }
-      ]
+      ],
+      "text": "Moon dust is covering the solar panels, so less sunlight gets in."
     },
     {
       "id": "storm_warning",
       "day": 3,
       "title": "Storm warning",
-      "choices": []
+      "choices": [],
+      "text": "Mission Control says a solar storm may hit tomorrow. Get ready!"
     },
     {
       "id": "storm_1",
@@ -47,21 +64,37 @@
           "id": "fix",
           "ap": 2,
           "power": 8,
-          "effect": "greenhouse normal"
+          "effect": "greenhouse normal",
+          "label": "Fix the pump",
+          "effects": {
+            "clear_pump_fault": true
+          }
         },
         {
           "id": "ignore",
           "ap": 0,
           "power": 0,
-          "effect": "output -50% for 3 days"
+          "effect": "output -50% for 3 days",
+          "label": "Ignore it",
+          "effects": {
+            "pump_fault": {
+              "output_percent": 50,
+              "days": 3
+            }
+          }
         },
         {
           "id": "off",
           "ap": 1,
           "power": 0,
-          "effect": "no water used, no food"
+          "effect": "no water used, no food",
+          "label": "Turn the greenhouse off",
+          "effects": {
+            "set_greenhouse": "off"
+          }
         }
-      ]
+      ],
+      "text": "The greenhouse water pump broke. Plants need it to grow food."
     },
     {
       "id": "micrometeorite_leak",
@@ -72,21 +105,44 @@
           "id": "patch",
           "ap": 1,
           "power": 0,
-          "effect": "oxygen -5 once"
+          "effect": "oxygen -5 once",
+          "label": "Patch the hole",
+          "effects": {
+            "oxygen_leak": {
+              "amount": 5,
+              "days": 1
+            }
+          }
         },
         {
           "id": "ignore",
           "ap": 0,
           "power": 0,
-          "effect": "oxygen -5 per day for 3 days"
+          "effect": "oxygen -5 per day for 3 days",
+          "label": "Ignore it",
+          "effects": {
+            "oxygen_leak": {
+              "amount": 5,
+              "days": 3
+            }
+          }
         },
         {
           "id": "emergency_o2",
           "ap": 1,
           "power": 6,
-          "effect": "+10 oxygen, partial fix"
+          "effect": "+10 oxygen, partial fix",
+          "label": "Use emergency oxygen",
+          "effects": {
+            "oxygen": 10,
+            "oxygen_leak": {
+              "amount": 5,
+              "days": 1
+            }
+          }
         }
-      ]
+      ],
+      "text": "A tiny space rock made a small hole in the base. Air is slowly leaking out."
     },
     {
       "id": "research_window",
@@ -97,21 +153,32 @@
           "id": "double",
           "ap": 3,
           "power": 25,
-          "effect": "+30 science"
+          "effect": "+30 science",
+          "label": "Double experiment",
+          "effects": {
+            "science": 30
+          }
         },
         {
           "id": "normal",
           "ap": 2,
           "power": 10,
-          "effect": "+10 science"
+          "effect": "+10 science",
+          "label": "Normal experiment",
+          "effects": {
+            "science": 10
+          }
         },
         {
           "id": "skip",
           "ap": 0,
           "power": 0,
-          "effect": "none"
+          "effect": "none",
+          "label": "Skip it",
+          "effects": {}
         }
-      ]
+      ],
+      "text": "A great time for science! Experiments give you Science points."
     },
     {
       "id": "storm_2",
@@ -129,15 +196,22 @@
           "id": "repair",
           "ap": 3,
           "power": 0,
-          "effect": "battery max stays 100"
+          "effect": "battery max stays 100",
+          "label": "Repair the battery",
+          "effects": {}
         },
         {
           "id": "ignore",
           "ap": 0,
           "power": 0,
-          "effect": "battery max 80 for the rest"
+          "effect": "battery max 80 for the rest",
+          "label": "Ignore it",
+          "effects": {
+            "battery_max": 80
+          }
         }
-      ]
+      ],
+      "text": "A battery cell is failing. The battery may hold less power."
     },
     {
       "id": "comms_blackout",
@@ -146,13 +220,26 @@
       "choices": [
         {
           "id": "wait",
-          "effect": "no requests that day"
+          "effect": "no requests that day",
+          "label": "Wait it out",
+          "effects": {
+            "comms_blocked_today": true
+          },
+          "ap": 0,
+          "power": 0
         },
         {
           "id": "send",
-          "effect": "reply arrives 1 day later than usual"
+          "effect": "reply arrives 1 day later than usual",
+          "label": "Send a message anyway",
+          "effects": {
+            "comms_extra_delay": 1
+          },
+          "ap": 0,
+          "power": 0
         }
-      ]
+      ],
+      "text": "Noise from the Sun is blocking radio messages to Earth today."
     },
     {
       "id": "storm_3",

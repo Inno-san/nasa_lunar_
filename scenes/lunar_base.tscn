@@ -1,10 +1,10 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://deah58jpawlfi"]
 
-[ext_resource type="Script" path="res://scripts/lunar_base.gd" id="1_base"]
+[ext_resource type="Script" uid="uid://iyfxxok4sfya" path="res://scripts/lunar_base.gd" id="1_base"]
 [ext_resource type="PackedScene" path="res://scenes/facility.tscn" id="2_fac"]
-[ext_resource type="PackedScene" path="res://scenes/astronaut.tscn" id="3_astro"]
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="4_hud"]
-[ext_resource type="Script" path="res://scripts/ui/dashboard_manager.gd" id="5_dash"]
+[ext_resource type="PackedScene" uid="uid://dd2noumn7dijo" path="res://scenes/astronaut.tscn" id="3_astro"]
+[ext_resource type="Script" uid="uid://dapd8leguyoq1" path="res://scripts/ui/hud.gd" id="4_hud"]
+[ext_resource type="Script" uid="uid://dmdmvie48xchl" path="res://scripts/ui/dashboard_manager.gd" id="5_dash"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
 size = Vector2(1180, 24)
@@ -12,16 +12,17 @@ size = Vector2(1180, 24)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
 size = Vector2(24, 530)
 
-[node name="LunarBase" type="Node2D"]
+[node name="LunarBase" type="Node2D" unique_id=252617055]
 script = ExtResource("1_base")
+metadata/_edit_horizontal_guides_ = [721.0]
 
-[node name="RegolithBackground" type="ColorRect" parent="."]
+[node name="RegolithBackground" type="ColorRect" parent="." unique_id=954658743]
 offset_right = 1280.0
 offset_bottom = 720.0
 mouse_filter = 2
 color = Color(0.11, 0.13, 0.17, 1)
 
-[node name="HabitatFloor" type="ColorRect" parent="."]
+[node name="HabitatFloor" type="ColorRect" parent="." unique_id=62943520]
 offset_left = 62.0
 offset_top = 98.0
 offset_right = 1218.0
@@ -29,9 +30,9 @@ offset_bottom = 606.0
 mouse_filter = 2
 color = Color(0.19, 0.23, 0.3, 1)
 
-[node name="CorridorLines" type="Node2D" parent="."]
+[node name="CorridorLines" type="Node2D" parent="." unique_id=1728500197]
 
-[node name="HorizontalWalkway" type="ColorRect" parent="CorridorLines"]
+[node name="HorizontalWalkway" type="ColorRect" parent="CorridorLines" unique_id=607115861]
 offset_left = 180.0
 offset_top = 334.0
 offset_right = 1100.0
@@ -39,7 +40,7 @@ offset_bottom = 374.0
 mouse_filter = 2
 color = Color(0.24, 0.29, 0.37, 1)
 
-[node name="VerticalWalkway" type="ColorRect" parent="CorridorLines"]
+[node name="VerticalWalkway" type="ColorRect" parent="CorridorLines" unique_id=1882640096]
 offset_left = 620.0
 offset_top = 150.0
 offset_right = 660.0
@@ -47,7 +48,7 @@ offset_bottom = 550.0
 mouse_filter = 2
 color = Color(0.24, 0.29, 0.37, 1)
 
-[node name="BaseTitleLabel" type="Label" parent="."]
+[node name="BaseTitleLabel" type="Label" parent="." unique_id=1685279925]
 offset_left = 470.0
 offset_top = 106.0
 offset_right = 810.0
@@ -57,7 +58,7 @@ theme_override_font_sizes/font_size = 14
 text = "LUNAR OUTPOST: MISSION 01 — HABITAT DECK"
 horizontal_alignment = 1
 
-[node name="ControlsHintLabel" type="Label" parent="."]
+[node name="ControlsHintLabel" type="Label" parent="." unique_id=814012124]
 offset_left = 410.0
 offset_top = 126.0
 offset_right = 870.0
@@ -67,27 +68,26 @@ theme_override_font_sizes/font_size = 12
 text = "Move: WASD / Arrow Keys / Click Floor   |   Open Facility: Press [E] or Click Console"
 horizontal_alignment = 1
 
-[node name="Walls" type="StaticBody2D" parent="."]
-collision_layer = 1
+[node name="Walls" type="StaticBody2D" parent="." unique_id=623413081]
 collision_mask = 0
 
-[node name="TopWall" type="CollisionShape2D" parent="Walls"]
+[node name="TopWall" type="CollisionShape2D" parent="Walls" unique_id=734105483]
 position = Vector2(640, 96)
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="BottomWall" type="CollisionShape2D" parent="Walls"]
+[node name="BottomWall" type="CollisionShape2D" parent="Walls" unique_id=1395346332]
 position = Vector2(640, 608)
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="LeftWall" type="CollisionShape2D" parent="Walls"]
+[node name="LeftWall" type="CollisionShape2D" parent="Walls" unique_id=1797367935]
 position = Vector2(60, 352)
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="RightWall" type="CollisionShape2D" parent="Walls"]
+[node name="RightWall" type="CollisionShape2D" parent="Walls" unique_id=867009267]
 position = Vector2(1220, 352)
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="WallVisualTop" type="ColorRect" parent="Walls"]
+[node name="WallVisualTop" type="ColorRect" parent="Walls" unique_id=133025852]
 offset_left = 48.0
 offset_top = 84.0
 offset_right = 1232.0
@@ -95,7 +95,7 @@ offset_bottom = 108.0
 mouse_filter = 2
 color = Color(0.36, 0.43, 0.54, 1)
 
-[node name="WallVisualBottom" type="ColorRect" parent="Walls"]
+[node name="WallVisualBottom" type="ColorRect" parent="Walls" unique_id=955072678]
 offset_left = 48.0
 offset_top = 596.0
 offset_right = 1232.0
@@ -103,7 +103,7 @@ offset_bottom = 620.0
 mouse_filter = 2
 color = Color(0.36, 0.43, 0.54, 1)
 
-[node name="WallVisualLeft" type="ColorRect" parent="Walls"]
+[node name="WallVisualLeft" type="ColorRect" parent="Walls" unique_id=679868820]
 offset_left = 48.0
 offset_top = 84.0
 offset_right = 72.0
@@ -111,7 +111,7 @@ offset_bottom = 620.0
 mouse_filter = 2
 color = Color(0.36, 0.43, 0.54, 1)
 
-[node name="WallVisualRight" type="ColorRect" parent="Walls"]
+[node name="WallVisualRight" type="ColorRect" parent="Walls" unique_id=1702543942]
 offset_left = 1208.0
 offset_top = 84.0
 offset_right = 1232.0
@@ -119,49 +119,46 @@ offset_bottom = 620.0
 mouse_filter = 2
 color = Color(0.36, 0.43, 0.54, 1)
 
-[node name="Facilities" type="Node2D" parent="."]
+[node name="Facilities" type="Node2D" parent="." unique_id=1424767231]
 
-[node name="PowerStation" parent="Facilities" instance=ExtResource("2_fac")]
+[node name="PowerStation" parent="Facilities" unique_id=371961947 instance=ExtResource("2_fac")]
 position = Vector2(240, 215)
-facility_id = "power_station"
-facility_title = "Power Station"
-facility_subtitle = "Solar & Battery"
 facility_color = Color(0.92, 0.68, 0.16, 1)
 
-[node name="LifeSupport" parent="Facilities" instance=ExtResource("2_fac")]
+[node name="LifeSupport" parent="Facilities" unique_id=365620132 instance=ExtResource("2_fac")]
 position = Vector2(1040, 215)
 facility_id = "life_support"
 facility_title = "Life Support"
 facility_subtitle = "Oxygen System"
 facility_color = Color(0.2, 0.74, 0.85, 1)
 
-[node name="Greenhouse" parent="Facilities" instance=ExtResource("2_fac")]
+[node name="Greenhouse" parent="Facilities" unique_id=267315336 instance=ExtResource("2_fac")]
 position = Vector2(240, 485)
 facility_id = "greenhouse"
 facility_title = "Greenhouse"
 facility_subtitle = "Food & Water"
 facility_color = Color(0.28, 0.76, 0.38, 1)
 
-[node name="RadiationShelter" parent="Facilities" instance=ExtResource("2_fac")]
+[node name="RadiationShelter" parent="Facilities" unique_id=266021045 instance=ExtResource("2_fac")]
 position = Vector2(640, 495)
 facility_id = "radiation_shelter"
 facility_title = "Radiation Shelter"
 facility_subtitle = "Storm Shield"
 facility_color = Color(0.62, 0.42, 0.88, 1)
 
-[node name="CommsRoom" parent="Facilities" instance=ExtResource("2_fac")]
+[node name="CommsRoom" parent="Facilities" unique_id=717379512 instance=ExtResource("2_fac")]
 position = Vector2(1040, 485)
 facility_id = "comms_room"
 facility_title = "Communications Room"
 facility_subtitle = "Earth Link (2d delay)"
 facility_color = Color(0.32, 0.54, 0.92, 1)
 
-[node name="Astronaut" parent="." instance=ExtResource("3_astro")]
+[node name="Astronaut" parent="." unique_id=757463506 instance=ExtResource("3_astro")]
 position = Vector2(640, 345)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1064356032]
 
-[node name="HUD" type="Control" parent="CanvasLayer"]
+[node name="HUD" type="Control" parent="CanvasLayer" unique_id=1418676428]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -170,7 +167,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_hud")
 
-[node name="DashboardManager" type="Control" parent="CanvasLayer"]
+[node name="DashboardManager" type="Control" parent="CanvasLayer" unique_id=770899488]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -179,4 +176,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("5_dash")
-

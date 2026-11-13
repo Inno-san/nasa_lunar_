@@ -1,0 +1,1 @@
+Milestones 4-5: build the five dashboards (Power, Life Support, Greenhouse, Radiation Shelter, Comms) using GameState.try_action. Disable unaffordable actions and show what is missing. Implement the shortage cut order with plain-language explanations. Branch feature/dashboards.

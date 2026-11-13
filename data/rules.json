@@ -1,0 +1,145 @@
+{
+  "mission_days": 10,
+  "ap_per_day": 6,
+  "start": {
+    "battery": 60,
+    "oxygen": 70,
+    "food": 45,
+    "water": 30,
+    "health": 100,
+    "shield": 1
+  },
+  "max": {
+    "battery": 100,
+    "oxygen": 100,
+    "food": 100,
+    "water": 40,
+    "health": 100,
+    "shield": 3
+  },
+  "power": {
+    "solar": 36,
+    "base_load": 6,
+    "shield_upkeep_per_level": 2
+  },
+  "life_support": {
+    "eco": {
+      "cost": 8,
+      "o2": 4
+    },
+    "normal": {
+      "cost": 14,
+      "o2": 10
+    },
+    "high": {
+      "cost": 20,
+      "o2": 16
+    }
+  },
+  "greenhouse": {
+    "off": {
+      "cost": 0,
+      "water": 0,
+      "food": 0
+    },
+    "low": {
+      "cost": 8,
+      "water": 3,
+      "food": 5
+    },
+    "high": {
+      "cost": 14,
+      "water": 5,
+      "food": 10
+    },
+    "delay_days": 2
+  },
+  "consumption": {
+    "oxygen": 10,
+    "food": 8
+  },
+  "water_recycle": 2,
+  "shortage_order": [
+    "greenhouse",
+    "life_support_eco",
+    "shield_upkeep",
+    "life_support_off"
+  ],
+  "storm": {
+    "base_damage": [
+      10,
+      20,
+      35
+    ],
+    "shield_reduction": 0.2,
+    "lockdown_factor": 0.5,
+    "lockdown_low_power_factor": 0.75,
+    "lockdown_power": 4,
+    "timer_warned": 20,
+    "timer_surprise": 10
+  },
+  "comms": {
+    "delay_days": 2,
+    "forecast": {
+      "ap": 1,
+      "power": 4
+    },
+    "advice": {
+      "ap": 1,
+      "power": 4
+    },
+    "resupply": {
+      "ap": 1,
+      "power": 6,
+      "delay": 3,
+      "send_by_day": 6,
+      "options": {
+        "oxygen": 25,
+        "food": 25,
+        "water": 15
+      }
+    }
+  },
+  "actions": {
+    "experiment": {
+      "ap": 2,
+      "power": 10,
+      "science": 10
+    },
+    "set_life_support": {
+      "ap": 1,
+      "power": 0
+    },
+    "emergency_oxygen": {
+      "ap": 1,
+      "power": 6,
+      "oxygen": 10
+    },
+    "set_greenhouse": {
+      "ap": 1,
+      "power": 0
+    },
+    "upgrade_shield": {
+      "ap": 2,
+      "power": 12
+    },
+    "repair_pump": {
+      "ap": 2,
+      "power": 8
+    },
+    "repair_panel": {
+      "ap": 2,
+      "power": 0
+    }
+  },
+  "penalties": {
+    "oxygen_zero": 25,
+    "food_zero": 10,
+    "daily_heal": 3
+  },
+  "win": {
+    "min_health": 50,
+    "two_stars_health": 80,
+    "three_stars_science": 30
+  }
+}

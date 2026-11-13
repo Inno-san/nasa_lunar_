@@ -1,0 +1,1 @@
+Milestones 6-7: day progression, event system from data/events.json, MessageQueue for delayed comms and food crates, storm phase with countdown, run-to-shelter and Lockdown, low-power lockdown rule, warnings only for severity 1 unless a forecast arrived. Branch feature/events-storms.

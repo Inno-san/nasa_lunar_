@@ -1,0 +1,1 @@
+Milestones 8-9: NasaData autoload reading data/donki_cached.json and data/osdr_facts.json; show the linked DONKI record on the storm screen; OSDR fact cards with source and date; credits screen; tooltips; end screen with stars and what-went-wrong replay; Web export and GitHub Pages deployment. Branch feature/nasa-polish.

@@ -1,0 +1,165 @@
+{
+  "events": [
+    {
+      "id": "dusty_panels",
+      "day": 2,
+      "title": "Dusty Panels",
+      "choices": [
+        {
+          "id": "clean",
+          "ap": 2,
+          "power": 0,
+          "effect": "generation stays 36"
+        },
+        {
+          "id": "ignore",
+          "ap": 0,
+          "power": 0,
+          "effect": "solar -8 for 3 days"
+        },
+        {
+          "id": "ask",
+          "ap": 1,
+          "power": 4,
+          "effect": "reply arrives day 4 (too late); teaches delay"
+        }
+      ]
+    },
+    {
+      "id": "storm_warning",
+      "day": 3,
+      "title": "Storm warning",
+      "choices": []
+    },
+    {
+      "id": "storm_1",
+      "day": 4,
+      "type": "storm",
+      "severity": 1,
+      "warned": true
+    },
+    {
+      "id": "pump_failure",
+      "day": 5,
+      "title": "Greenhouse Pump Failure",
+      "choices": [
+        {
+          "id": "fix",
+          "ap": 2,
+          "power": 8,
+          "effect": "greenhouse normal"
+        },
+        {
+          "id": "ignore",
+          "ap": 0,
+          "power": 0,
+          "effect": "output -50% for 3 days"
+        },
+        {
+          "id": "off",
+          "ap": 1,
+          "power": 0,
+          "effect": "no water used, no food"
+        }
+      ]
+    },
+    {
+      "id": "micrometeorite_leak",
+      "day": 6,
+      "title": "Micrometeorite Leak",
+      "choices": [
+        {
+          "id": "patch",
+          "ap": 1,
+          "power": 0,
+          "effect": "oxygen -5 once"
+        },
+        {
+          "id": "ignore",
+          "ap": 0,
+          "power": 0,
+          "effect": "oxygen -5 per day for 3 days"
+        },
+        {
+          "id": "emergency_o2",
+          "ap": 1,
+          "power": 6,
+          "effect": "+10 oxygen, partial fix"
+        }
+      ]
+    },
+    {
+      "id": "research_window",
+      "day": 7,
+      "title": "Research Window",
+      "choices": [
+        {
+          "id": "double",
+          "ap": 3,
+          "power": 25,
+          "effect": "+30 science"
+        },
+        {
+          "id": "normal",
+          "ap": 2,
+          "power": 10,
+          "effect": "+10 science"
+        },
+        {
+          "id": "skip",
+          "ap": 0,
+          "power": 0,
+          "effect": "none"
+        }
+      ]
+    },
+    {
+      "id": "storm_2",
+      "day": 8,
+      "type": "storm",
+      "severity": 2,
+      "warned": false
+    },
+    {
+      "id": "battery_cell",
+      "day": 9,
+      "title": "Battery Cell Failure",
+      "choices": [
+        {
+          "id": "repair",
+          "ap": 3,
+          "power": 0,
+          "effect": "battery max stays 100"
+        },
+        {
+          "id": "ignore",
+          "ap": 0,
+          "power": 0,
+          "effect": "battery max 80 for the rest"
+        }
+      ]
+    },
+    {
+      "id": "comms_blackout",
+      "day": 9,
+      "title": "Comms Blackout",
+      "choices": [
+        {
+          "id": "wait",
+          "effect": "no requests that day"
+        },
+        {
+          "id": "send",
+          "effect": "reply arrives 1 day later than usual"
+        }
+      ]
+    },
+    {
+      "id": "storm_3",
+      "day": 10,
+      "type": "storm",
+      "severity": 3,
+      "warned": false
+    }
+  ]
+}

@@ -146,10 +146,33 @@ func _run_checks() -> void:
 	_check(astro.walk_audio != null, "Expected Astronaut AudioStreamPlayer walk_audio to exist")
 	_check(astro.anim_sprite != null and astro.anim_sprite.sprite_frames != null, "Expected Astronaut AnimatedSprite2D with SpriteFrames")
 	var sf: SpriteFrames = astro.anim_sprite.sprite_frames
-	_check(sf.get_frame_count("run") == 10 and sf.get_animation_loop("run") and is_equal_approx(sf.get_animation_speed("run"), 12.0), "Expected run: 10 frames, loop, 12 fps")
-	_check(sf.get_frame_count("connect") == 1 and not sf.get_animation_loop("connect") and is_equal_approx(sf.get_animation_speed("connect"), 12.0), "Expected connect: 1 frame, once, 12 fps")
-	_check(sf.get_frame_count("stop") == 4 and not sf.get_animation_loop("stop") and is_equal_approx(sf.get_animation_speed("stop"), 12.0), "Expected stop: 4 frames, once, 12 fps")
-	_check(sf.get_frame_count("idle") == 3 and sf.get_animation_loop("idle") and is_equal_approx(sf.get_animation_speed("idle"), 12.0), "Expected idle: 3 frames, loop, 12 fps")
+	_check(sf.get_frame_count("run") == 10 and sf.get_animation_loop("run") and is_equal_approx(sf.get_animation_speed("run"), 12.0), "Expected run: 10 frames (0-9), loop, 12 fps")
+	_check(sf.get_frame_count("connect") == 1 and not sf.get_animation_loop("connect") and is_equal_approx(sf.get_animation_speed("connect"), 12.0), "Expected connect: 1 frame (11), once, 12 fps")
+	_check(sf.get_frame_count("stop") == 2 and not sf.get_animation_loop("stop") and is_equal_approx(sf.get_animation_speed("stop"), 12.0), "Expected stop: 2 frames (13, 14), once, 12 fps")
+	_check(sf.get_frame_count("idle") == 1 and sf.get_animation_loop("idle") and is_equal_approx(sf.get_animation_speed("idle"), 12.0), "Expected idle: 1 frame (15), loop, 12 fps")
+	var hollow_regions := [Rect2(0, 1024, 512, 512), Rect2(1024, 1024, 512, 512), Rect2(512, 1536, 512, 512)]
+	for anim_name in ["run", "connect", "stop", "idle"]:
+		for fi in range(sf.get_frame_count(anim_name)):
+			var atex: AtlasTexture = sf.get_frame_texture(anim_name, fi)
+			_check(atex.region not in hollow_regions, "Hollow frame region found in " + anim_name)
+	# Simulate standing still for 10 seconds + walking and stopping 3 times
+	for _tick in range(600):
+		astro._update_animation_and_pet(false, 1.0 / 60.0)
+		var cur_tex: AtlasTexture = sf.get_frame_texture(astro.anim_sprite.animation, astro.anim_sprite.frame)
+		_check(cur_tex.region not in hollow_regions, "Hollow frame shown while standing still")
+	for _cycle in range(3):
+		astro.velocity = Vector2(240, 0)
+		for _tick in range(60):
+			astro._update_animation_and_pet(true, 1.0 / 60.0)
+			var cur_tex: AtlasTexture = sf.get_frame_texture(astro.anim_sprite.animation, astro.anim_sprite.frame)
+			_check(cur_tex.region not in hollow_regions, "Hollow frame shown while walking")
+		astro.velocity = Vector2.ZERO
+		astro._update_animation_and_pet(false, 1.0 / 60.0)
+		_check(astro.anim_sprite.animation == &"connect", "Expected connect on stop")
+		astro._on_animation_finished()
+		_check(astro.anim_sprite.animation == &"stop", "Expected stop after connect")
+		astro._on_animation_finished()
+		_check(astro.anim_sprite.animation == &"idle", "Expected idle after stop")
 	_check(astro.pet_follower != null and astro.pet_sprite != null and astro.pet_sprite.sprite_frames != null, "Expected PetFollower AnimatedSprite2D")
 	var psf: SpriteFrames = astro.pet_sprite.sprite_frames
 	_check(psf.get_frame_count("default") == 10 and psf.get_animation_loop("default") and is_equal_approx(psf.get_animation_speed("default"), 12.0), "Expected pet default: 10 frames, loop, 12 fps")

@@ -84,7 +84,7 @@ region = Rect2(1024, 1536, 512, 512)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_c10")
+"texture": SubResource("AtlasTexture_c11")
 }],
 "loop": false,
 "name": &"connect",
@@ -93,12 +93,6 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_c15")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_c16")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_c17")
 }],
 "loop": true,
 "name": &"idle",
@@ -140,12 +134,6 @@ animations = [{
 "speed": 12.0
 }, {
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_c11")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_c12")
-}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_c13")
 }, {

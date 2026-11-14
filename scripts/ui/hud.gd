@@ -6,17 +6,12 @@ extends Control
 signal touch_move_changed(direction: Vector2)
 signal interact_pressed
 
-var top_bar: PanelContainer
-var bottom_dock: PanelContainer
 var day_ap_label: Label
 var shield_label: Label
 var science_label: Label
 var coach_label: Label
 var end_day_button: Button
-var dashboard_button: Button
 var mute_button: Button
-var day5_test_button: Button
-var reset_button: Button
 
 var meter_widgets: Dictionary = {}
 var dpad_state := {"up": false, "down": false, "left": false, "right": false}
@@ -32,18 +27,20 @@ func _ready() -> void:
 
 
 func _build_ui() -> void:
-	# 1. TOP CHAMFERED STATUS BAR (compact, deep cosmic purple + neon violet border)
-	top_bar = PanelContainer.new()
+	_build_top_bar()
+	_build_bottom_dock()
+	_build_touch_controls()
+
+
+func _build_top_bar() -> void:
+	var top_bar := PanelContainer.new()
 	top_bar.anchor_left = 0.03
 	top_bar.anchor_right = 0.97
 	top_bar.anchor_top = 0.0
 	top_bar.anchor_bottom = 0.0
 	top_bar.offset_top = 6.0
 	top_bar.offset_bottom = 86.0
-	top_bar.add_theme_stylebox_override(
-		"panel",
-		UiKit.panel_style(UiKit.COLOR_BG_DEEP, UiKit.COLOR_BORDER, 8, 12, 6)
-	)
+	top_bar.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_BG_DEEP, UiKit.COLOR_BORDER, 8, 12, 6))
 	add_child(top_bar)
 
 	var top_vbox := VBoxContainer.new()
@@ -63,7 +60,6 @@ func _build_ui() -> void:
 	shield_label = _make_badge(meters_row, "SHIELD\n★☆☆", Color(0.75, 0.55, 1.0), "shielding")
 	science_label = _make_badge(meters_row, "SCIENCE\n☆☆☆", Color(0.98, 0.76, 0.08), "")
 
-	# Coach / Status row inside top bar
 	var coach_row := HBoxContainer.new()
 	coach_row.add_theme_constant_override("separation", 8)
 	top_vbox.add_child(coach_row)
@@ -83,8 +79,9 @@ func _build_ui() -> void:
 		tbtn.pressed.connect(Explain.show_term.bind(term_pair[0]))
 		coach_row.add_child(tbtn)
 
-	# 2. BOTTOM CHAMFERED CONTROL DOCK (matches the reference screenshot's bottom bar)
-	bottom_dock = PanelContainer.new()
+
+func _build_bottom_dock() -> void:
+	var bottom_dock := PanelContainer.new()
 	bottom_dock.anchor_left = 0.5
 	bottom_dock.anchor_right = 0.5
 	bottom_dock.anchor_top = 1.0
@@ -93,10 +90,7 @@ func _build_ui() -> void:
 	bottom_dock.offset_right = 380.0
 	bottom_dock.offset_top = -54.0
 	bottom_dock.offset_bottom = -6.0
-	bottom_dock.add_theme_stylebox_override(
-		"panel",
-		UiKit.panel_style(UiKit.COLOR_BG_DEEP, UiKit.COLOR_BORDER, 8, 12, 6)
-	)
+	bottom_dock.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_BG_DEEP, UiKit.COLOR_BORDER, 8, 12, 6))
 	add_child(bottom_dock)
 
 	var dock_row := HBoxContainer.new()
@@ -104,13 +98,11 @@ func _build_ui() -> void:
 	dock_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	bottom_dock.add_child(dock_row)
 
-	# Left golden CTA button (like "RESEARCH" in the reference screenshot)
-	dashboard_button = UiKit.gold_button("DASHBOARD [E]", 14, Vector2(148, 34))
+	var dashboard_button := UiKit.gold_button("DASHBOARD [E]", 14, Vector2(148, 34))
 	dashboard_button.tooltip_text = "Open or close the Lunar Outpost command dashboard."
 	dashboard_button.pressed.connect(func() -> void: interact_pressed.emit())
 	dock_row.add_child(dashboard_button)
 
-	# Center status counter (like "19 / 6 / 500" in the reference screenshot)
 	day_ap_label = Label.new()
 	day_ap_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	day_ap_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -119,18 +111,17 @@ func _build_ui() -> void:
 	day_ap_label.add_theme_color_override("font_color", UiKit.COLOR_TEXT)
 	dock_row.add_child(day_ap_label)
 
-	# Right golden control buttons (like the [■] [▶] [▶▶] [▶▶▶] cluster in the reference screenshot)
 	mute_button = UiKit.button("🔊 ON", 12, Vector2(64, 34))
 	mute_button.tooltip_text = "Mute or unmute game audio."
 	mute_button.pressed.connect(func() -> void: AudioManager.toggle_mute())
 	dock_row.add_child(mute_button)
 
-	day5_test_button = UiKit.button("DAY-5", 11, Vector2(58, 34))
+	var day5_test_button := UiKit.button("DAY-5", 11, Vector2(58, 34))
 	day5_test_button.tooltip_text = "Run Day-5 verification test."
 	day5_test_button.pressed.connect(_on_day5_test_pressed)
 	dock_row.add_child(day5_test_button)
 
-	reset_button = UiKit.button("MENU", 12, Vector2(62, 34))
+	var reset_button := UiKit.button("MENU", 12, Vector2(62, 34))
 	reset_button.tooltip_text = "Return to Main Menu."
 	reset_button.pressed.connect(_on_menu_pressed)
 	dock_row.add_child(reset_button)
@@ -140,21 +131,21 @@ func _build_ui() -> void:
 	end_day_button.pressed.connect(_on_end_day_pressed)
 	dock_row.add_child(end_day_button)
 
-	_build_touch_controls()
+
+func _bind_term_click(panel: Control, term_id: String) -> void:
+	if term_id == "":
+		return
+	panel.gui_input.connect(func(ev: InputEvent) -> void:
+		if UiKit.is_left_click(ev):
+			Explain.show_term(term_id)
+	)
 
 
 func _make_badge(parent: Container, text_str: String, color: Color, term_id: String) -> Label:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(96, 44)
-	panel.add_theme_stylebox_override(
-		"panel",
-		UiKit.panel_style(UiKit.COLOR_ROW, color, 5, 8, 4)
-	)
-	if term_id != "":
-		panel.gui_input.connect(func(ev: InputEvent) -> void:
-			if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT and ev.pressed:
-				Explain.show_term(term_id)
-		)
+	panel.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_ROW, color, 5, 8, 4))
+	_bind_term_click(panel, term_id)
 	parent.add_child(panel)
 
 	var lbl := Label.new()
@@ -170,16 +161,10 @@ func _make_bar_meter(parent: Container, title: String, color: Color, term_id: St
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.custom_minimum_size = Vector2(150, 44)
-	panel.add_theme_stylebox_override(
-		"panel",
-		UiKit.panel_style(UiKit.COLOR_ROW, UiKit.COLOR_BORDER_DIM, 5, 8, 3)
-	)
+	panel.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_ROW, UiKit.COLOR_BORDER_DIM, 5, 8, 3))
 	if term_id != "":
 		panel.tooltip_text = "Click to learn about " + title
-		panel.gui_input.connect(func(ev: InputEvent) -> void:
-			if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT and ev.pressed:
-				Explain.show_term(term_id)
-		)
+		_bind_term_click(panel, term_id)
 	parent.add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -291,17 +276,11 @@ func _on_game_state_changed() -> void:
 		else:
 			fill.bg_color = w["base_color"]
 
-	var sh_stars := ""
-	for i in range(Rules.max_value("shield")):
-		sh_stars += "★" if i < GameState.shield else "☆"
-	shield_label.text = "SHIELD\n" + sh_stars
+	shield_label.text = "SHIELD\n" + UiKit.stars(GameState.shield, Rules.max_value("shield"))
 
 	var sci_goal := maxi(1, int(Rules.win_data().get("three_stars_science", 30)))
 	var sci_bars := clampi(int(round(float(GameState.science) / float(sci_goal) * 3.0)), 0, 3)
-	var sci_stars := ""
-	for i in range(3):
-		sci_stars += "★" if i < sci_bars else "☆"
-	science_label.text = "SCIENCE\n" + sci_stars
+	science_label.text = "SCIENCE\n" + UiKit.stars(sci_bars, 3)
 
 	coach_label.text = GameState.coach_hint()
 	end_day_button.disabled = GameState.game_over or GameState.phase != GameState.PHASE_PLAYING

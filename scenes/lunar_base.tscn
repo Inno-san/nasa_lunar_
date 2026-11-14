@@ -111,7 +111,7 @@ shader_parameter/color = Color(0.4862745, 0.7137255, 0, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_itwvu"]
 shader = ExtResource("5_tnol5")
-shader_parameter/color = Color(0.7019608, 0.34117648, 0, 1)
+shader_parameter/color = Color(0.62, 0.38, 0.92, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_kxdql"]
 shader = ExtResource("5_tnol5")

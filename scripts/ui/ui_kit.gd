@@ -6,11 +6,9 @@ extends RefCounted
 const FONT_BODY := 16
 const FONT_SMALL := 14
 const FONT_TITLE := 22
-const FONT_HUGE := 32
 
 const COLOR_BG_DEEP := Color(0.05, 0.02, 0.11, 0.97)      # #0d051c
 const COLOR_PANEL := Color(0.08, 0.04, 0.16, 0.96)        # #140a29
-const COLOR_SUBPANEL := Color(0.10, 0.05, 0.20, 0.95)     # #1a0d33
 const COLOR_ROW := Color(0.15, 0.09, 0.28, 0.95)          # #261747
 const COLOR_SIDE_SELECTED := Color(0.25, 0.23, 0.36, 1.0) # #403b5c
 const COLOR_BORDER := Color(0.45, 0.18, 0.96, 1.0)        # #732ef5 neon purple
@@ -185,3 +183,18 @@ static func clear_children(node: Node) -> void:
 	for child in node.get_children():
 		node.remove_child(child)
 		child.queue_free()
+
+
+static func stars(filled: int, total: int, sep: String = "") -> String:
+	var parts: Array[String] = []
+	for i in range(total):
+		parts.append("★" if i < filled else "☆")
+	return sep.join(parts)
+
+
+static func is_left_click(event: InputEvent) -> bool:
+	return event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+
+
+static func is_click_or_touch(event: InputEvent) -> bool:
+	return is_left_click(event) or (event is InputEventScreenTouch and event.pressed)

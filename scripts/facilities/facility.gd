@@ -25,7 +25,7 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
-	prompt_button.pressed.connect(_on_prompt_button_pressed)
+	prompt_button.pressed.connect(_handle_click)
 	_apply_visuals()
 	_update_prompt()
 
@@ -80,16 +80,9 @@ func _on_mouse_exited() -> void:
 
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	if UiKit.is_click_or_touch(event):
 		_handle_click()
 		get_viewport().set_input_as_handled()
-	elif event is InputEventScreenTouch and event.pressed:
-		_handle_click()
-		get_viewport().set_input_as_handled()
-
-
-func _on_prompt_button_pressed() -> void:
-	_handle_click()
 
 
 func _handle_click() -> void:

@@ -30,6 +30,7 @@ func _ready() -> void:
 	storm_overlay = StormOverlay.new()
 	storm_overlay.in_shelter = func() -> bool:
 		return shelter_facility != null and shelter_facility.astronaut_in_range
+	storm_overlay.countdown_started.connect(_sync_astronaut_lock)
 	storm_overlay.finished.connect(_on_storm_finished)
 	canvas_layer.add_child(storm_overlay)
 

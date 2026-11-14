@@ -3,6 +3,7 @@ extends Control
 ## Storm phase screens: (1) a card with the linked NASA record, (2) a countdown banner
 ## with a one-click button to rush into the Radiation Shelter and lock down.
 
+signal countdown_started
 signal finished(reached_shelter: bool)
 
 var in_shelter: Callable = func() -> bool: return false
@@ -73,6 +74,7 @@ func _start_countdown() -> void:
 	_counting = true
 	_banner.visible = true
 	_update_banner()
+	countdown_started.emit()
 
 
 func _build_banner() -> void:

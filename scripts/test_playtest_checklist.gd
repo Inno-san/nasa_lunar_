@@ -149,6 +149,11 @@ func _run_checks() -> void:
 	var pwr: Area2D = base_inst.get_node("Facilities/PowerStation")
 	base_inst._handle_world_click(pwr.global_position)
 	_check(astro.pending_facility == pwr, "Expected click on PowerStation to set pending_facility=PowerStation")
+	base_inst._on_storm_started({"day": 4, "severity": 1, "warned": true, "seconds": 10.0, "record": {}})
+	_check(astro.movement_locked == true, "Expected astronaut locked while storm intro card is open")
+	base_inst.storm_overlay._start_countdown()
+	_check(astro.movement_locked == false, "Expected astronaut unlocked during storm countdown so player can run to shelter")
+	base_inst.storm_overlay._finish(true)
 	var dm: Control = base_inst.get_node("CanvasLayer/DashboardManager")
 	for fid in ["power_station", "life_support", "greenhouse", "radiation_shelter", "comms_room"]:
 		dm.open_dashboard(fid)

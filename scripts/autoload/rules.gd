@@ -17,18 +17,19 @@ func _ready() -> void:
 
 
 func load_rules() -> void:
-	if not FileAccess.file_exists(RULES_PATH):
-		push_error("Rules file not found at: " + RULES_PATH)
-		return
-	var file := FileAccess.open(RULES_PATH, FileAccess.READ)
+	data = read_json_dict(RULES_PATH)
+	if data.is_empty():
+		push_error("Failed to load JSON in: " + RULES_PATH)
+
+
+static func read_json_dict(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		push_error("Failed to open rules file: " + RULES_PATH)
-		return
+		return {}
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		data = parsed
-	else:
-		push_error("Failed to parse JSON in: " + RULES_PATH)
+	return parsed if typeof(parsed) == TYPE_DICTIONARY else {}
 
 
 func mission_days() -> int:
@@ -40,53 +41,43 @@ func ap_per_day() -> int:
 
 
 func start_value(key: String) -> int:
-	var start_dict: Dictionary = data.get("start", {})
-	return int(start_dict.get(key, 0))
+	return int(data.get("start", {}).get(key, 0))
 
 
 func max_value(key: String) -> int:
-	var max_dict: Dictionary = data.get("max", {})
-	return int(max_dict.get(key, 0))
+	return int(data.get("max", {}).get(key, 0))
 
 
 func power_solar() -> int:
-	var power_dict: Dictionary = data.get("power", {})
-	return int(power_dict.get("solar", 0))
+	return int(data.get("power", {}).get("solar", 0))
 
 
 func power_base_load() -> int:
-	var power_dict: Dictionary = data.get("power", {})
-	return int(power_dict.get("base_load", 0))
+	return int(data.get("power", {}).get("base_load", 0))
 
 
 func shield_upkeep_per_level() -> int:
-	var power_dict: Dictionary = data.get("power", {})
-	return int(power_dict.get("shield_upkeep_per_level", 0))
+	return int(data.get("power", {}).get("shield_upkeep_per_level", 0))
 
 
 func life_support_mode_data(mode: String) -> Dictionary:
-	var ls_dict: Dictionary = data.get("life_support", {})
-	return ls_dict.get(mode, {"cost": 0, "o2": 0})
+	return data.get("life_support", {}).get(mode, {"cost": 0, "o2": 0})
 
 
 func greenhouse_mode_data(mode: String) -> Dictionary:
-	var gh_dict: Dictionary = data.get("greenhouse", {})
-	return gh_dict.get(mode, {"cost": 0, "water": 0, "food": 0})
+	return data.get("greenhouse", {}).get(mode, {"cost": 0, "water": 0, "food": 0})
 
 
 func greenhouse_delay_days() -> int:
-	var gh_dict: Dictionary = data.get("greenhouse", {})
-	return int(gh_dict.get("delay_days", 0))
+	return int(data.get("greenhouse", {}).get("delay_days", 0))
 
 
 func consumption_oxygen() -> int:
-	var cons_dict: Dictionary = data.get("consumption", {})
-	return int(cons_dict.get("oxygen", 0))
+	return int(data.get("consumption", {}).get("oxygen", 0))
 
 
 func consumption_food() -> int:
-	var cons_dict: Dictionary = data.get("consumption", {})
-	return int(cons_dict.get("food", 0))
+	return int(data.get("consumption", {}).get("food", 0))
 
 
 func water_recycle() -> int:

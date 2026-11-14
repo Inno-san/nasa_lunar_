@@ -29,15 +29,10 @@ func show_end_screen() -> void:
 	box.add_child(UiKit.label(title_text, UiKit.FONT_TITLE, title_color))
 
 	var stars := GameState.stars_earned
-	var star_icons := ""
-	for i in range(3):
-		star_icons += "★ " if i < stars else "☆ "
-	var star_line := "Your Rating: %s (%d of 3 Stars)" % [star_icons.strip_edges(), stars] if won else "Your Rating: ☆ ☆ ☆ (Keep Crew Health Good through Day 10 to win!)"
+	var star_line := "Your Rating: %s (%d of 3 Stars)" % [UiKit.stars(stars, 3, " "), stars] if won else "Your Rating: ☆ ☆ ☆ (Keep Crew Health Good through Day 10 to win!)"
 	box.add_child(UiKit.label(star_line, UiKit.FONT_BODY, UiKit.COLOR_WARN))
 
-	var sh_stars := ""
-	for i in range(Rules.max_value("shield")):
-		sh_stars += "★" if i < GameState.shield else "☆"
+	var sh_stars := UiKit.stars(GameState.shield, Rules.max_value("shield"))
 	var meters_summary := "Final Base Check — Health: %s  |  Battery: %s  |  Oxygen: %s  |  Food: %s  |  Water: %s  |  Shield: %s" % [
 		GameState.meter_word("health"),
 		GameState.meter_word("battery"),

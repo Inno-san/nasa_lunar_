@@ -49,13 +49,11 @@ func _ready() -> void:
 func _build_menu() -> void:
 	UiKit.clear_children(self)
 
-	# 1. Custom drawn backdrop (stars, Earth in top-right, Moon horizon with craters at bottom)
 	var backdrop := _MenuBackdrop.new()
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
 
-	# 2. Main content container
 	var root_margin := MarginContainer.new()
 	root_margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root_margin.add_theme_constant_override("margin_left", 76)
@@ -68,7 +66,19 @@ func _build_menu() -> void:
 	vbox.add_theme_constant_override("separation", 18)
 	root_margin.add_child(vbox)
 
-	# Header block
+	_build_header(vbox)
+	_build_briefing_card(vbox)
+	var play_btn := _build_action_buttons(vbox)
+
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_child(spacer)
+
+	_build_bottom_bar(vbox)
+	play_btn.grab_focus()
+
+
+func _build_header(vbox: VBoxContainer) -> void:
 	var header_box := VBoxContainer.new()
 	header_box.add_theme_constant_override("separation", 2)
 	vbox.add_child(header_box)
@@ -91,7 +101,8 @@ func _build_menu() -> void:
 	subtitle.add_theme_color_override("font_color", COLOR_SUBTEXT)
 	header_box.add_child(subtitle)
 
-	# 3. Mission Briefing — Space Science Fact Card
+
+func _build_briefing_card(vbox: VBoxContainer) -> void:
 	var briefing_card := PanelContainer.new()
 	briefing_card.custom_minimum_size = Vector2(0, 178)
 	var card_style := StyleBoxFlat.new()
@@ -110,7 +121,6 @@ func _build_menu() -> void:
 	card_hbox.add_theme_constant_override("separation", 26)
 	briefing_card.add_child(card_hbox)
 
-	# Left Rover/Astronaut sprite (assets/art/astro.png)
 	var rover_icon := TextureRect.new()
 	rover_icon.texture = load("res://assets/art/astro.png")
 	rover_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -118,13 +128,11 @@ func _build_menu() -> void:
 	rover_icon.custom_minimum_size = Vector2(150, 134)
 	card_hbox.add_child(rover_icon)
 
-	# Vertical divider line inside card
 	var vdiv := ColorRect.new()
 	vdiv.custom_minimum_size = Vector2(2, 118)
 	vdiv.color = Color(0.75, 0.82, 0.90, 0.7)
 	card_hbox.add_child(vdiv)
 
-	# Right text column inside card
 	var fact_vbox := VBoxContainer.new()
 	fact_vbox.add_theme_constant_override("separation", 8)
 	fact_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -166,7 +174,8 @@ func _build_menu() -> void:
 	src_link.add_theme_color_override("font_hover_color", COLOR_TEAL)
 	src_row.add_child(src_link)
 
-	# 4. Three Main Buttons Row
+
+func _build_action_buttons(vbox: VBoxContainer) -> Button:
 	var btn_row := HBoxContainer.new()
 	btn_row.add_theme_constant_override("separation", 22)
 	vbox.add_child(btn_row)
@@ -185,19 +194,15 @@ func _build_menu() -> void:
 	credits_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	credits_btn.pressed.connect(_open_credits)
 	btn_row.add_child(credits_btn)
+	return play_btn
 
-	# Spacer before bottom bar
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_child(spacer)
 
-	# 5. Bottom Row: Sound toggle pill + 7 vertical-divided science term icons
+func _build_bottom_bar(vbox: VBoxContainer) -> void:
 	var bottom_row := HBoxContainer.new()
 	bottom_row.add_theme_constant_override("separation", 0)
 	bottom_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_child(bottom_row)
 
-	# Sound: On + teal pill switch
 	var sound_box := HBoxContainer.new()
 	sound_box.add_theme_constant_override("separation", 12)
 	sound_box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -213,7 +218,7 @@ func _build_menu() -> void:
 	_sound_toggle = _PillToggle.new()
 	_sound_toggle.custom_minimum_size = Vector2(58, 30)
 	_sound_toggle.gui_input.connect(func(ev: InputEvent) -> void:
-		if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT and ev.pressed:
+		if UiKit.is_left_click(ev):
 			AudioManager.toggle_mute()
 	)
 	sound_box.add_child(_sound_toggle)
@@ -233,13 +238,9 @@ func _build_menu() -> void:
 		sep.color = Color(0.75, 0.82, 0.90, 0.65)
 		bottom_row.add_child(sep)
 
-		var tid: String = spec[0]
-		var tlabel: String = spec[1]
-		var item_btn := _make_term_icon_btn(tid, tlabel)
+		var item_btn := _make_term_icon_btn(spec[0], spec[1])
 		item_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bottom_row.add_child(item_btn)
-
-	play_btn.grab_focus()
 
 
 func _make_orange_cta(text_str: String) -> Button:
@@ -321,7 +322,7 @@ func _make_term_icon_btn(term_id: String, label_text: String) -> Control:
 	col.add_child(lbl)
 
 	panel.gui_input.connect(func(ev: InputEvent) -> void:
-		if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT and ev.pressed:
+		if UiKit.is_left_click(ev):
 			Explain.show_term(term_id)
 	)
 	panel.mouse_entered.connect(func() -> void:
@@ -348,10 +349,6 @@ func _on_mute_changed(is_muted: bool) -> void:
 func _on_play_button_pressed() -> void:
 	GameState.reset_game()
 	get_tree().change_scene_to_file("res://scenes/lunar_base.tscn")
-
-
-func _on_exit_button_pressed() -> void:
-	get_tree().quit()
 
 
 func _close_modal() -> void:

@@ -1,10 +1,239 @@
-[gd_scene format=3 uid="uid://dd2noumn7dijo"]
+[gd_scene load_steps=36 format=3 uid="uid://dd2noumn7dijo"]
 
 [ext_resource type="Script" uid="uid://dqy3mv6dbdi8m" path="res://scripts/player/astronaut.gd" id="1_astro"]
 [ext_resource type="AudioStream" uid="uid://wqjnyt5v2125" path="res://assets/audio/walk_sound.mpeg.wav" id="2_dmfei"]
+[ext_resource type="Texture2D" uid="uid://br4n53lqp7ag4" path="res://assets/art/spritesheet.png" id="3_sheet"]
+[ext_resource type="Texture2D" uid="uid://dwnfudyukflif" path="res://assets/art/Pet spritesheet.png" id="4_pet"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfbqe"]
 size = Vector2(40, 36)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c0"]
+atlas = ExtResource("3_sheet")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c1"]
+atlas = ExtResource("3_sheet")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c2"]
+atlas = ExtResource("3_sheet")
+region = Rect2(1024, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c3"]
+atlas = ExtResource("3_sheet")
+region = Rect2(1536, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4"]
+atlas = ExtResource("3_sheet")
+region = Rect2(2048, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c5"]
+atlas = ExtResource("3_sheet")
+region = Rect2(0, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c6"]
+atlas = ExtResource("3_sheet")
+region = Rect2(512, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c7"]
+atlas = ExtResource("3_sheet")
+region = Rect2(1024, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c8"]
+atlas = ExtResource("3_sheet")
+region = Rect2(1536, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c9"]
+atlas = ExtResource("3_sheet")
+region = Rect2(2048, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c10"]
+atlas = ExtResource("3_sheet")
+region = Rect2(0, 1024, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c11"]
+atlas = ExtResource("3_sheet")
+region = Rect2(512, 1024, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c12"]
+atlas = ExtResource("3_sheet")
+region = Rect2(1024, 1024, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c13"]
+atlas = ExtResource("3_sheet")
+region = Rect2(1536, 1024, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c14"]
+atlas = ExtResource("3_sheet")
+region = Rect2(2048, 1024, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c15"]
+atlas = ExtResource("3_sheet")
+region = Rect2(0, 1536, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c16"]
+atlas = ExtResource("3_sheet")
+region = Rect2(512, 1536, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c17"]
+atlas = ExtResource("3_sheet")
+region = Rect2(1024, 1536, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_astro"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c10")
+}],
+"loop": false,
+"name": &"connect",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c15")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c16")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c17")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c9")
+}],
+"loop": true,
+"name": &"run",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c11")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c12")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c13")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c14")
+}],
+"loop": false,
+"name": &"stop",
+"speed": 12.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p0"]
+atlas = ExtResource("4_pet")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p1"]
+atlas = ExtResource("4_pet")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p2"]
+atlas = ExtResource("4_pet")
+region = Rect2(1024, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p3"]
+atlas = ExtResource("4_pet")
+region = Rect2(1536, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p4"]
+atlas = ExtResource("4_pet")
+region = Rect2(0, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p5"]
+atlas = ExtResource("4_pet")
+region = Rect2(512, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p6"]
+atlas = ExtResource("4_pet")
+region = Rect2(1024, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p7"]
+atlas = ExtResource("4_pet")
+region = Rect2(1536, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p8"]
+atlas = ExtResource("4_pet")
+region = Rect2(0, 1024, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p9"]
+atlas = ExtResource("4_pet")
+region = Rect2(512, 1024, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pet"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p9")
+}],
+"loop": true,
+"name": &"default",
+"speed": 12.0
+}]
 
 [node name="Astronaut" type="CharacterBody2D" unique_id=1626678363 groups=["astronaut"]]
 collision_layer = 2
@@ -22,37 +251,13 @@ offset_bottom = 24.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.35)
 
-[node name="Backpack" type="ColorRect" parent="Visuals" unique_id=1233087304]
-offset_left = -20.0
-offset_top = -14.0
-offset_right = 20.0
-offset_bottom = 14.0
-mouse_filter = 2
-color = Color(0.75, 0.8, 0.88, 1)
-
-[node name="SuitBody" type="ColorRect" parent="Visuals" unique_id=1732272302]
-offset_left = -16.0
-offset_top = -18.0
-offset_right = 16.0
-offset_bottom = 18.0
-mouse_filter = 2
-color = Color(0.95, 0.97, 1, 1)
-
-[node name="SuitBadge" type="ColorRect" parent="Visuals" unique_id=2018506518]
-offset_left = -8.0
-offset_top = 4.0
-offset_right = 8.0
-offset_bottom = 12.0
-mouse_filter = 2
-color = Color(0.9, 0.3, 0.25, 1)
-
-[node name="Visor" type="ColorRect" parent="Visuals" unique_id=1006080953]
-offset_left = -11.0
-offset_top = -13.0
-offset_right = 11.0
-offset_bottom = 1.0
-mouse_filter = 2
-color = Color(0.2, 0.72, 0.95, 1)
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visuals" unique_id=1732272302]
+texture_filter = 4
+position = Vector2(2.5, -10)
+scale = Vector2(0.14, 0.14)
+sprite_frames = SubResource("SpriteFrames_astro")
+animation = &"idle"
+autoplay = "idle"
 
 [node name="NameLabel" type="Label" parent="Visuals" unique_id=767233646]
 anchors_preset = -1
@@ -71,6 +276,18 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 12
 text = "Astro"
 horizontal_alignment = 1
+
+[node name="PetFollower" type="Node2D" parent="." unique_id=1984723610]
+top_level = true
+z_index = 1
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="PetFollower" unique_id=1984723611]
+texture_filter = 4
+position = Vector2(34.8, 8.9)
+scale = Vector2(0.275, 0.275)
+sprite_frames = SubResource("SpriteFrames_pet")
+animation = &"default"
+autoplay = "default"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1106764426]
 shape = SubResource("RectangleShape2D_xfbqe")

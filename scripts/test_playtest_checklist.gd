@@ -144,6 +144,50 @@ func _run_checks() -> void:
 	root.add_child(base_inst)
 	var astro: CharacterBody2D = base_inst.get_node("Astronaut")
 	_check(astro.walk_audio != null, "Expected Astronaut AudioStreamPlayer walk_audio to exist")
+	_check(astro.anim_sprite != null and astro.anim_sprite.sprite_frames != null, "Expected Astronaut AnimatedSprite2D with SpriteFrames")
+	var sf: SpriteFrames = astro.anim_sprite.sprite_frames
+	_check(sf.get_frame_count("run") == 10 and sf.get_animation_loop("run") and is_equal_approx(sf.get_animation_speed("run"), 12.0), "Expected run: 10 frames, loop, 12 fps")
+	_check(sf.get_frame_count("connect") == 1 and not sf.get_animation_loop("connect") and is_equal_approx(sf.get_animation_speed("connect"), 12.0), "Expected connect: 1 frame, once, 12 fps")
+	_check(sf.get_frame_count("stop") == 4 and not sf.get_animation_loop("stop") and is_equal_approx(sf.get_animation_speed("stop"), 12.0), "Expected stop: 4 frames, once, 12 fps")
+	_check(sf.get_frame_count("idle") == 3 and sf.get_animation_loop("idle") and is_equal_approx(sf.get_animation_speed("idle"), 12.0), "Expected idle: 3 frames, loop, 12 fps")
+	_check(astro.pet_follower != null and astro.pet_sprite != null and astro.pet_sprite.sprite_frames != null, "Expected PetFollower AnimatedSprite2D")
+	var psf: SpriteFrames = astro.pet_sprite.sprite_frames
+	_check(psf.get_frame_count("default") == 10 and psf.get_animation_loop("default") and is_equal_approx(psf.get_animation_speed("default"), 12.0), "Expected pet default: 10 frames, loop, 12 fps")
+
+	# Verify animation state machine: idle -> run (right/left flip) -> connect -> stop -> idle, and interrupt back to run
+	_check(astro.anim_sprite.animation == &"idle", "Expected initial animation to be idle")
+	astro.velocity = Vector2(240, 0)
+	astro._update_animation_and_pet(true, 0.016)
+	_check(astro.anim_sprite.animation == &"run" and astro.anim_sprite.flip_h == false, "Expected run facing right")
+	astro.velocity = Vector2(-240, 0)
+	astro._update_animation_and_pet(true, 0.016)
+	_check(astro.anim_sprite.animation == &"run" and astro.anim_sprite.flip_h == true, "Expected run facing left")
+	astro.velocity = Vector2.ZERO
+	astro._update_animation_and_pet(false, 0.016)
+	_check(astro.anim_sprite.animation == &"connect", "Expected transition to connect when stopping")
+	astro._on_animation_finished()
+	_check(astro.anim_sprite.animation == &"stop", "Expected transition from connect to stop")
+	astro.velocity = Vector2(240, 0)
+	astro._update_animation_and_pet(true, 0.016)
+	_check(astro.anim_sprite.animation == &"run", "Expected immediate return to run if movement restarts during stop")
+	astro.velocity = Vector2.ZERO
+	astro._update_animation_and_pet(false, 0.016)
+	astro._on_animation_finished()
+	astro._on_animation_finished()
+	_check(astro.anim_sprite.animation == &"idle", "Expected transition from stop to idle")
+
+	# Verify walking into all 5 facilities and touch controls
+	for fac_name in ["PowerStation", "LifeSupport", "Greenhouse", "RadiationShelter", "CommsRoom"]:
+		var fac_node: Area2D = base_inst.get_node("Facilities/" + fac_name)
+		_check(fac_node != null, "Missing facility node " + fac_name)
+		fac_node._on_body_entered(astro)
+		_check(astro.get_nearest_facility() == fac_node, "Expected nearest facility to be " + fac_name)
+		fac_node._on_body_exited(astro)
+	astro.touch_direction = Vector2(1, 0)
+	astro._physics_process(0.016)
+	_check(astro.velocity.x > 0.0, "Expected touch_direction to drive astronaut velocity")
+	astro.touch_direction = Vector2.ZERO
+
 	base_inst._handle_world_click(Vector2(500, 500))
 	_check(astro.has_click_target == true, "Expected click on floor to set has_click_target=true")
 	var pwr: Area2D = base_inst.get_node("Facilities/PowerStation")

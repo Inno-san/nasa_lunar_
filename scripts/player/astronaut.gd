@@ -1,5 +1,12 @@
 extends CharacterBody2D
 
+const CHAR_CENTER_OFFSET_X := 2.5
+const PET_CELL_OFFSET := Vector2(34.8, 8.9)
+const PET_FOLLOW_OFFSET := Vector2(32.0, -24.0) # 40 px distance behind and above the player
+const PET_LERP_SPEED := 6.0
+const PET_BOB_SPEED := 4.0
+const PET_BOB_AMPLITUDE := 3.5
+
 @export var walk_speed: float = 240.0
 
 var touch_direction: Vector2 = Vector2.ZERO
@@ -9,15 +16,33 @@ var nearby_facilities: Array[Area2D] = []
 var has_click_target: bool = false
 var click_target_pos: Vector2 = Vector2.ZERO
 var pending_facility: Area2D = null
+var facing_left: bool = false
+
 var _stuck_timer: float = 0.0
+var _was_moving: bool = false
+var _bob_time: float = 0.0
 
 @onready var walk_audio: AudioStreamPlayer = get_node_or_null("AudioStreamPlayer")
+@onready var anim_sprite: AnimatedSprite2D = get_node_or_null("Visuals/AnimatedSprite2D")
+@onready var pet_follower: Node2D = get_node_or_null("PetFollower")
+@onready var pet_sprite: AnimatedSprite2D = get_node_or_null("PetFollower/AnimatedSprite2D")
+
+
+func _ready() -> void:
+	if anim_sprite != null:
+		anim_sprite.animation_finished.connect(_on_animation_finished)
+		anim_sprite.play(&"idle")
+	if pet_sprite != null:
+		pet_sprite.play(&"default")
+	if pet_follower != null:
+		pet_follower.global_position = global_position + _get_pet_target_offset(0.0)
 
 
 func _physics_process(delta: float) -> void:
 	if movement_locked:
 		velocity = Vector2.ZERO
 		_update_walk_sound(false)
+		_update_animation_and_pet(false, delta)
 		move_and_slide()
 		return
 
@@ -55,6 +80,54 @@ func _physics_process(delta: float) -> void:
 
 	var is_moving := velocity.length() > 5.0 and get_real_velocity().length() > 5.0
 	_update_walk_sound(is_moving)
+	_update_animation_and_pet(is_moving, delta)
+
+
+func _update_animation_and_pet(is_moving: bool, delta: float) -> void:
+	if is_moving:
+		if velocity.x < -1.0:
+			facing_left = true
+		elif velocity.x > 1.0:
+			facing_left = false
+		if anim_sprite != null:
+			anim_sprite.flip_h = facing_left
+			anim_sprite.position.x = -CHAR_CENTER_OFFSET_X if facing_left else CHAR_CENTER_OFFSET_X
+			if anim_sprite.animation != &"run" or not anim_sprite.is_playing():
+				anim_sprite.play(&"run")
+		_was_moving = true
+		_bob_time = 0.0
+	else:
+		if _was_moving:
+			_was_moving = false
+			if anim_sprite != null:
+				anim_sprite.play(&"connect")
+		elif anim_sprite != null and not anim_sprite.is_playing() and anim_sprite.animation not in [&"connect", &"stop"]:
+			anim_sprite.play(&"idle")
+		_bob_time += delta
+
+	if pet_follower != null:
+		var bob_y := 0.0 if is_moving else sin(_bob_time * PET_BOB_SPEED) * PET_BOB_AMPLITUDE
+		var target_pos := global_position + _get_pet_target_offset(bob_y)
+		pet_follower.global_position = pet_follower.global_position.lerp(target_pos, clampf(PET_LERP_SPEED * delta, 0.0, 1.0))
+	if pet_sprite != null:
+		pet_sprite.flip_h = facing_left
+		pet_sprite.position.x = -PET_CELL_OFFSET.x if facing_left else PET_CELL_OFFSET.x
+		if not pet_sprite.is_playing():
+			pet_sprite.play(&"default")
+
+
+func _get_pet_target_offset(bob_y: float) -> Vector2:
+	var behind_x := PET_FOLLOW_OFFSET.x if facing_left else -PET_FOLLOW_OFFSET.x
+	return Vector2(behind_x, PET_FOLLOW_OFFSET.y + bob_y)
+
+
+func _on_animation_finished() -> void:
+	if anim_sprite == null or _was_moving:
+		return
+	if anim_sprite.animation == &"connect":
+		anim_sprite.play(&"stop")
+	elif anim_sprite.animation == &"stop":
+		anim_sprite.play(&"idle")
 
 
 func _update_walk_sound(is_moving: bool) -> void:

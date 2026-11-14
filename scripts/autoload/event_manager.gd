@@ -17,13 +17,10 @@ func _ready() -> void:
 
 
 func load_events() -> void:
-	events.clear()
-	if not FileAccess.file_exists(EVENTS_PATH):
-		push_error("Events file not found: " + EVENTS_PATH)
-		return
-	var parsed: Variant = JSON.parse_string(FileAccess.open(EVENTS_PATH, FileAccess.READ).get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		events = parsed.get("events", [])
+	var parsed := Rules.read_json_dict(EVENTS_PATH)
+	if parsed.is_empty():
+		push_error("Events file not found or invalid: " + EVENTS_PATH)
+	events = parsed.get("events", [])
 
 
 ## The storm planned for this day, or {} if none. Keys: id, severity, warned.

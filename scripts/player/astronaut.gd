@@ -46,7 +46,6 @@ func _physics_process(_delta: float) -> void:
 			velocity = to_target.normalized() * walk_speed
 	else:
 		velocity = Vector2.ZERO
-
 	move_and_slide()
 
 

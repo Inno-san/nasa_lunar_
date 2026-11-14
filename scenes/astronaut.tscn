@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://dd2noumn7dijo"]
 
 [ext_resource type="Script" uid="uid://dqy3mv6dbdi8m" path="res://scripts/player/astronaut.gd" id="1_astro"]
+[ext_resource type="AudioStream" uid="uid://wqjnyt5v2125" path="res://assets/audio/walk_sound.mpeg.wav" id="2_dmfei"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 20.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xfbqe"]
+size = Vector2(40, 36)
 
 [node name="Astronaut" type="CharacterBody2D" unique_id=1626678363 groups=["astronaut"]]
 collision_layer = 2
+collision_mask = 3
 motion_mode = 1
 script = ExtResource("1_astro")
 
@@ -36,14 +38,6 @@ offset_bottom = 18.0
 mouse_filter = 2
 color = Color(0.95, 0.97, 1, 1)
 
-[node name="Visor" type="ColorRect" parent="Visuals" unique_id=1006080953]
-offset_left = -11.0
-offset_top = -13.0
-offset_right = 11.0
-offset_bottom = 1.0
-mouse_filter = 2
-color = Color(0.2, 0.72, 0.95, 1)
-
 [node name="SuitBadge" type="ColorRect" parent="Visuals" unique_id=2018506518]
 offset_left = -8.0
 offset_top = 4.0
@@ -52,26 +46,44 @@ offset_bottom = 12.0
 mouse_filter = 2
 color = Color(0.9, 0.3, 0.25, 1)
 
+[node name="Visor" type="ColorRect" parent="Visuals" unique_id=1006080953]
+offset_left = -11.0
+offset_top = -13.0
+offset_right = 11.0
+offset_bottom = 1.0
+mouse_filter = 2
+color = Color(0.2, 0.72, 0.95, 1)
+
 [node name="NameLabel" type="Label" parent="Visuals" unique_id=767233646]
-offset_left = -45.0
-offset_top = 20.0
-offset_right = 45.0
-offset_bottom = 40.0
+anchors_preset = -1
+anchor_left = 0.558
+anchor_right = 0.558
+anchor_bottom = 0.135
+offset_left = -43.0
+offset_top = 24.0
+offset_right = 47.0
+offset_bottom = 62.0
+size_flags_horizontal = 10
+size_flags_vertical = 10
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 12
-text = "Astronaut"
+text = "Lunar"
 horizontal_alignment = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1106764426]
-shape = SubResource("CircleShape2D_body")
+shape = SubResource("RectangleShape2D_xfbqe")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=733349617]
 zoom = Vector2(2, 2)
-limit_left = 1
-limit_top = 1
-limit_right = 1280
-limit_bottom = 721
+limit_left = -552
+limit_top = -329
+limit_right = 2200
+limit_bottom = 1657
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=272479057]
+stream = ExtResource("2_dmfei")
+max_polyphony = 3

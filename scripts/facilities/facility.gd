@@ -101,4 +101,3 @@ func _handle_click() -> void:
 
 func request_interaction() -> void:
 	interaction_requested.emit(facility_id)
-

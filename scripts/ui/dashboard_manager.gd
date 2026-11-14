@@ -436,7 +436,7 @@ func _build_sub_tabs(_meta: Dictionary) -> void:
 		sub_tabs_box.add_child(btn)
 
 
-func _build_rows(meta: Dictionary) -> void:
+func _build_rows(_meta: Dictionary) -> void:
 	UiKit.clear_children(table_headers)
 	UiKit.clear_children(rows_vbox)
 

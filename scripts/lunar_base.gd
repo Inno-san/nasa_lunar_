@@ -24,7 +24,7 @@ func _ready() -> void:
 
 	hud.touch_move_changed.connect(_on_touch_move_changed)
 	hud.interact_pressed.connect(_on_hud_interact_pressed)
-	dashboard_manager.dashboard_visibility_changed.connect(_func_sync_lock)
+	dashboard_manager.dashboard_visibility_changed.connect(_sync_astronaut_lock.unbind(1))
 	dashboard_manager.lockdown_requested.connect(_on_lockdown_requested)
 
 	storm_overlay = StormOverlay.new()
@@ -38,7 +38,7 @@ func _ready() -> void:
 	canvas_layer.add_child(day_summary)
 
 	event_popup = EventPopup.new()
-	event_popup.answered.connect(_on_event_answered)
+	event_popup.answered.connect(_show_next_pending_event)
 	canvas_layer.add_child(event_popup)
 
 	end_screen = EndScreen.new()
@@ -52,11 +52,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _is_any_modal_open():
-		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_handle_world_click(get_global_mouse_position())
-	elif event is InputEventScreenTouch and event.pressed:
+	if not _is_any_modal_open() and UiKit.is_click_or_touch(event):
 		_handle_world_click(get_global_mouse_position())
 
 
@@ -79,10 +75,6 @@ func _is_any_modal_open() -> bool:
 		or (end_screen != null and end_screen.is_open())
 		or (storm_overlay != null and storm_overlay.is_active() and not storm_overlay.is_counting())
 	)
-
-
-func _func_sync_lock(_open: bool) -> void:
-	_sync_astronaut_lock()
 
 
 func _sync_astronaut_lock() -> void:
@@ -157,10 +149,6 @@ func _show_next_pending_event() -> void:
 		var next_ev: Dictionary = GameState.pending_events.pop_front()
 		event_popup.show_event(next_ev)
 	_sync_astronaut_lock()
-
-
-func _on_event_answered() -> void:
-	_show_next_pending_event()
 
 
 func _on_play_again() -> void:

@@ -36,8 +36,6 @@ const FALLBACK_FACTS: Array = [
 
 var storm_records: Array = []
 var facts: Array = []
-var donki_from_fallback: bool = false
-var osdr_from_fallback: bool = false
 
 var _fact_order: Array = []
 var _fact_cursor: int = 0
@@ -56,29 +54,13 @@ func _ready() -> void:
 
 
 func load_all() -> void:
-	var donki: Dictionary = _read_json(DONKI_PATH)
-	storm_records = donki.get("records", [])
-	donki_from_fallback = storm_records.is_empty()
-	if donki_from_fallback:
+	storm_records = Rules.read_json_dict(DONKI_PATH).get("records", [])
+	if storm_records.is_empty():
 		storm_records = FALLBACK_STORMS.duplicate(true)
 
-	var osdr: Dictionary = _read_json(OSDR_PATH)
-	facts = osdr.get("facts", [])
-	osdr_from_fallback = facts.is_empty()
-	if osdr_from_fallback:
+	facts = Rules.read_json_dict(OSDR_PATH).get("facts", [])
+	if facts.is_empty():
 		facts = FALLBACK_FACTS.duplicate(true)
-
-
-func _read_json(path: String) -> Dictionary:
-	if not FileAccess.file_exists(path):
-		return {}
-	var file := FileAccess.open(path, FileAccess.READ)
-	if file == null:
-		return {}
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		return parsed
-	return {}
 
 
 ## Call at the start of every new run so facts can be shown again.

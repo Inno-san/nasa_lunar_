@@ -44,67 +44,10 @@ func show_report(report: Dictionary) -> void:
 
 	# 1. What changed in each meter and why (from day_end entry in GameState.event_log)
 	for m in day_end_entry.get("meters", []):
-		var key := String(m["key"])
-		var before := int(m["before"])
-		var after := int(m["after"])
-		var word := GameState.meter_word(key)
-		var change := "● Stayed steady"
-		var color := UiKit.COLOR_TEXT
-		if after > before:
-			change = "▲ Went up"
-			color = UiKit.COLOR_GOOD
-		elif after < before:
-			change = "▼ Went down"
-			color = UiKit.COLOR_WARN if word not in ["LOW!", "EMPTY!"] else UiKit.COLOR_BAD
-
-		var strip := PanelContainer.new()
-		strip.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_ROW, UiKit.COLOR_BORDER_DIM, 8, 6, 1))
-		var sbox := VBoxContainer.new()
-		sbox.add_theme_constant_override("separation", 3)
-		strip.add_child(sbox)
-
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 12)
-		var name_lbl := UiKit.label("%s: %s (%s)" % [String(m["label"]).to_upper(), word, change], 15, color, false)
-		name_lbl.custom_minimum_size = Vector2(260, 0)
-		row.add_child(name_lbl)
-
-		var bar := ProgressBar.new()
-		bar.show_percentage = false
-		bar.max_value = GameState.battery_max() if key == "battery" else Rules.max_value(key)
-		bar.value = after
-		bar.custom_minimum_size = Vector2(160, 14)
-		var fill := StyleBoxFlat.new()
-		fill.bg_color = color
-		bar.add_theme_stylebox_override("fill", fill)
-		row.add_child(bar)
-
-		var reasons: Array = m.get("lines", [])
-		var why_str := ", ".join(reasons) if not reasons.is_empty() else "Steady today"
-		row.add_child(UiKit.label("Why: " + why_str, 13, UiKit.COLOR_MUTED, true))
-		sbox.add_child(row)
-		body.add_child(strip)
+		_add_meter_strip(body, m)
 
 	# 2. Event choices, power/water cuts, storm damage, and messages read from GameState.event_log
-	var highlights: Array[String] = []
-	for entry in day_entries:
-		var etype := String(entry.get("type", ""))
-		match etype:
-			"event_choice":
-				highlights.append("Event choice — %s" % String(entry.get("text", "")))
-			"power_cut", "water_cut":
-				highlights.append("System cut — %s" % String(entry.get("text", "")))
-			"storm":
-				var dmg := int(entry.get("damage", 0))
-				var s_txt := String(entry.get("text", ""))
-				highlights.append("Solar storm — %s (Health -%d)" % [s_txt, dmg])
-			"penalty":
-				highlights.append("Warning — %s" % String(entry.get("text", "")))
-
-	for next_entry in GameState.get_day_events(day_no + 1):
-		if String(next_entry.get("type", "")) == "message_delivered":
-			highlights.append("Earth link — %s" % String(next_entry.get("text", "")))
-
+	var highlights := _collect_day_highlights(day_no, day_entries)
 	if not highlights.is_empty():
 		body.add_child(UiKit.label("KEY EVENTS, POWER CUTS & STORMS TODAY:", 15, UiKit.COLOR_WARN))
 		for line in highlights:
@@ -124,6 +67,68 @@ func show_report(report: Dictionary) -> void:
 	box.add_child(go)
 	add_child(_overlay)
 	go.grab_focus()
+
+
+func _add_meter_strip(body: VBoxContainer, m: Dictionary) -> void:
+	var key := String(m["key"])
+	var before := int(m["before"])
+	var after := int(m["after"])
+	var word := GameState.meter_word(key)
+	var change := "● Stayed steady"
+	var color := UiKit.COLOR_TEXT
+	if after > before:
+		change = "▲ Went up"
+		color = UiKit.COLOR_GOOD
+	elif after < before:
+		change = "▼ Went down"
+		color = UiKit.COLOR_WARN if word not in ["LOW!", "EMPTY!"] else UiKit.COLOR_BAD
+
+	var strip := PanelContainer.new()
+	strip.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_ROW, UiKit.COLOR_BORDER_DIM, 8, 6, 1))
+	var sbox := VBoxContainer.new()
+	sbox.add_theme_constant_override("separation", 3)
+	strip.add_child(sbox)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	var name_lbl := UiKit.label("%s: %s (%s)" % [String(m["label"]).to_upper(), word, change], 15, color, false)
+	name_lbl.custom_minimum_size = Vector2(260, 0)
+	row.add_child(name_lbl)
+
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.max_value = GameState.battery_max() if key == "battery" else Rules.max_value(key)
+	bar.value = after
+	bar.custom_minimum_size = Vector2(160, 14)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = color
+	bar.add_theme_stylebox_override("fill", fill)
+	row.add_child(bar)
+
+	var reasons: Array = m.get("lines", [])
+	var why_str := ", ".join(reasons) if not reasons.is_empty() else "Steady today"
+	row.add_child(UiKit.label("Why: " + why_str, 13, UiKit.COLOR_MUTED, true))
+	sbox.add_child(row)
+	body.add_child(strip)
+
+
+func _collect_day_highlights(day_no: int, day_entries: Array[Dictionary]) -> Array[String]:
+	var highlights: Array[String] = []
+	for entry in day_entries:
+		match String(entry.get("type", "")):
+			"event_choice":
+				highlights.append("Event choice — %s" % String(entry.get("text", "")))
+			"power_cut", "water_cut":
+				highlights.append("System cut — %s" % String(entry.get("text", "")))
+			"storm":
+				highlights.append("Solar storm — %s (Health -%d)" % [String(entry.get("text", "")), int(entry.get("damage", 0))])
+			"penalty":
+				highlights.append("Warning — %s" % String(entry.get("text", "")))
+
+	for next_entry in GameState.get_day_events(day_no + 1):
+		if String(next_entry.get("type", "")) == "message_delivered":
+			highlights.append("Earth link — %s" % String(next_entry.get("text", "")))
+	return highlights
 
 
 func close() -> void:

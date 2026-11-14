@@ -129,7 +129,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0, -82)]
+"values": [Vector2(0, -110)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -141,7 +141,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0, -80)]
+"values": [Vector2(0, -110)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -153,7 +153,7 @@ tracks/2/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0, -80)]
+"values": [Vector2(0, -110)]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
@@ -165,7 +165,7 @@ tracks/3/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0, -80)]
+"values": [Vector2(0, -110)]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
@@ -177,7 +177,7 @@ tracks/4/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0, -80)]
+"values": [Vector2(0, -110)]
 }
 
 [sub_resource type="Animation" id="Animation_2ttw2"]
@@ -194,7 +194,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0, -80), Vector2(0, -86), Vector2(0, -90), Vector2(0, -96), Vector2(0, -100)]
+"values": [Vector2(0, -110), Vector2(0, -116), Vector2(0, -120), Vector2(0, -126), Vector2(0, -130)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -206,7 +206,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0, -80), Vector2(0, -86), Vector2(0, -90), Vector2(0, -96), Vector2(0, -100)]
+"values": [Vector2(0, -110), Vector2(0, -116), Vector2(0, -120), Vector2(0, -126), Vector2(0, -130)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -218,7 +218,7 @@ tracks/2/keys = {
 "times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0, -80), Vector2(0, -86), Vector2(0, -90), Vector2(0, -96), Vector2(0, -100)]
+"values": [Vector2(0, -110), Vector2(0, -116), Vector2(0, -120), Vector2(0, -126), Vector2(0, -130)]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
@@ -230,7 +230,7 @@ tracks/3/keys = {
 "times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0, -80), Vector2(0, -86), Vector2(0, -90), Vector2(0, -96), Vector2(0, -100)]
+"values": [Vector2(0, -110), Vector2(0, -116), Vector2(0, -120), Vector2(0, -126), Vector2(0, -130)]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
@@ -242,7 +242,7 @@ tracks/4/keys = {
 "times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0, -80), Vector2(0, -86), Vector2(0, -90), Vector2(0, -96), Vector2(0, -100)]
+"values": [Vector2(0, -110), Vector2(0, -116), Vector2(0, -120), Vector2(0, -126), Vector2(0, -130)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_n8xpl"]
@@ -304,9 +304,8 @@ position = Vector2(-286, 607)
 facility_color = Color(0.92, 0.68, 0.16, 1)
 
 [node name="Power" type="Sprite2D" parent="Facilities/PowerStation" unique_id=283418599]
-visible = false
 material = SubResource("ShaderMaterial_dmfei")
-position = Vector2(0, -82)
+position = Vector2(0, -110)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("6_2ttw2")
 
@@ -318,9 +317,8 @@ facility_subtitle = "Oxygen System"
 facility_color = Color(0.2, 0.74, 0.85, 1)
 
 [node name="Helth" type="Sprite2D" parent="Facilities/LifeSupport" unique_id=192777326]
-visible = false
 material = SubResource("ShaderMaterial_n8xpl")
-position = Vector2(0, -80)
+position = Vector2(0, -110)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("8_2ttw2")
 
@@ -332,9 +330,8 @@ facility_subtitle = "Food & Water"
 facility_color = Color(0.28, 0.76, 0.38, 1)
 
 [node name="Greenhous" type="Sprite2D" parent="Facilities/Greenhouse" unique_id=1955278705]
-visible = false
 material = SubResource("ShaderMaterial_8vfu4")
-position = Vector2(0, -80)
+position = Vector2(0, -110)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("9_itwvu")
 
@@ -346,9 +343,8 @@ facility_subtitle = "Storm Shield"
 facility_color = Color(0.62, 0.42, 0.88, 1)
 
 [node name="Nuke" type="Sprite2D" parent="Facilities/RadiationShelter" unique_id=2065837199]
-visible = false
 material = SubResource("ShaderMaterial_itwvu")
-position = Vector2(0, -80)
+position = Vector2(0, -110)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("10_kdgmt")
 
@@ -360,9 +356,8 @@ facility_subtitle = "Earth Link (2d delay)"
 facility_color = Color(0.32, 0.54, 0.92, 1)
 
 [node name="Control" type="Sprite2D" parent="Facilities/CommsRoom" unique_id=628079899]
-visible = false
 material = SubResource("ShaderMaterial_kxdql")
-position = Vector2(0, -80)
+position = Vector2(0, -110)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("11_kxdql")
 

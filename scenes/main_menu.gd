@@ -110,9 +110,12 @@ func _build_menu() -> void:
 	card_hbox.add_theme_constant_override("separation", 26)
 	briefing_card.add_child(card_hbox)
 
-	# Left Rover/Astronaut line-art icon
-	var rover_icon := _RoverArt.new()
-	rover_icon.custom_minimum_size = Vector2(150, 128)
+	# Left Rover/Astronaut sprite (assets/art/astro.png)
+	var rover_icon := TextureRect.new()
+	rover_icon.texture = load("res://assets/art/astro.png")
+	rover_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rover_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rover_icon.custom_minimum_size = Vector2(150, 134)
 	card_hbox.add_child(rover_icon)
 
 	# Vertical divider line inside card
@@ -515,29 +518,6 @@ class _MenuBackdrop extends Control:
 			var a := float(i) / 24.0 * TAU
 			pts.append(c + Vector2(cos(a) * radii.x, sin(a) * radii.y))
 		draw_colored_polygon(pts, Color(0.36, 0.40, 0.46, 1.0))
-
-
-class _RoverArt extends Control:
-	func _draw() -> void:
-		var c := size * 0.5
-		var w := Color(0.96, 0.98, 1.0, 1.0)
-		# Ground line
-		draw_line(Vector2(12, c.y + 52), Vector2(size.x - 12, c.y + 52), w, 3.0)
-		# Astronaut helmet dome (top)
-		var hc := Vector2(c.x + 6, c.y - 16)
-		draw_arc(hc, 32.0, 0.0, TAU, 36, w, 3.5)
-		# Visor inside helmet
-		draw_arc(hc + Vector2(4, 0), 21.0, -PI * 0.45, PI * 0.55, 24, w, 2.5)
-		draw_line(hc + Vector2(4, -21), hc + Vector2(4, 21), w, 2.5)
-		# Rover chassis below helmet
-		draw_rect(Rect2(c.x - 36, c.y + 12, 78, 22), COLOR_CARD_BG, true)
-		draw_rect(Rect2(c.x - 36, c.y + 12, 78, 22), w, false, 3.0)
-		# Three rover wheels
-		for wx in [c.x - 30, c.x - 4, c.x + 30]:
-			var wc := Vector2(wx, c.y + 38)
-			draw_circle(wc, 13.0, COLOR_CARD_BG)
-			draw_arc(wc, 13.0, 0.0, TAU, 24, w, 3.0)
-			draw_circle(wc, 4.5, w)
 
 
 class _PillToggle extends Control:

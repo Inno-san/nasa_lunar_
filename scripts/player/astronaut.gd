@@ -34,19 +34,8 @@ func _physics_process(delta: float) -> void:
 		velocity = input_dir * walk_speed
 	elif has_click_target:
 		var to_target := click_target_pos - global_position
-		if pending_facility != null and pending_facility in nearby_facilities:
-			has_click_target = false
-			velocity = Vector2.ZERO
-			var fac := pending_facility
-			pending_facility = null
-			fac.request_interaction()
-		elif to_target.length() <= 10.0:
-			has_click_target = false
-			velocity = Vector2.ZERO
-			if pending_facility != null:
-				var fac := pending_facility
-				pending_facility = null
-				fac.request_interaction()
+		if (pending_facility != null and pending_facility in nearby_facilities) or to_target.length() <= 10.0:
+			_interact_and_stop(pending_facility)
 		else:
 			velocity = to_target.normalized() * walk_speed
 	else:
@@ -114,9 +103,7 @@ func register_nearby_facility(facility: Area2D) -> void:
 	if facility not in nearby_facilities:
 		nearby_facilities.append(facility)
 	if pending_facility == facility:
-		has_click_target = false
-		pending_facility = null
-		facility.request_interaction()
+		_interact_and_stop(facility)
 
 
 func unregister_nearby_facility(facility: Area2D) -> void:
@@ -127,11 +114,17 @@ func walk_to_point(world_pos: Vector2, target_facility: Area2D = null) -> void:
 	if movement_locked:
 		return
 	if target_facility != null and target_facility in nearby_facilities:
-		has_click_target = false
-		pending_facility = null
-		target_facility.request_interaction()
+		_interact_and_stop(target_facility)
 		return
 	click_target_pos = world_pos
 	pending_facility = target_facility
 	has_click_target = true
 	_stuck_timer = 0.0
+
+
+func _interact_and_stop(facility: Area2D = null) -> void:
+	has_click_target = false
+	pending_facility = null
+	velocity = Vector2.ZERO
+	if facility != null:
+		facility.request_interaction()

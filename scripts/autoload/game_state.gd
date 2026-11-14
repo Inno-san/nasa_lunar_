@@ -665,6 +665,11 @@ func _finish_day() -> Dictionary:
 		if oxygen_leak_days == 0:
 			oxygen_leak_amount = 0
 
+	var meters: Array = []
+	for key in METER_KEYS:
+		meters.append({"key": key, "label": String(key).capitalize(), "before": int(before[key]),
+			"after": int(get(key)), "lines": lines[key].duplicate()})
+
 	# STEP 7: NEXT DAY (refill AP, deliver messages, queue events)
 	var messages: Array[String] = []
 	if bool(_res["advance"]) and not game_over:
@@ -676,11 +681,6 @@ func _finish_day() -> Dictionary:
 		effective_shield_today = shield
 		_deliver_messages(messages, lines)
 		pending_events = EventManager.events_for_day(day)
-
-	var meters: Array = []
-	for key in METER_KEYS:
-		meters.append({"key": key, "label": String(key).capitalize(), "before": int(before[key]),
-			"after": int(get(key)), "lines": lines[key]})
 
 	last_day_report = {
 		"resolved_day": resolved_day, "battery": battery, "oxygen": oxygen, "food": food, "water": water,

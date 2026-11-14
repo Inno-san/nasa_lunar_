@@ -35,6 +35,10 @@
           "effect": "reply arrives day 4 (too late); teaches delay",
           "label": "Ask Earth for help",
           "effects": {
+            "solar_penalty": {
+              "amount": 8,
+              "days": 3
+            },
             "reply": "Mission Control says: clean the panels! Your reply came late. Messages from Earth take time."
           }
         }

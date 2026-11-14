@@ -10,3 +10,10 @@ export_presets.cfg
 data_private/
 .env
 *.key
+
+# Temp, backup, and OS files
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db

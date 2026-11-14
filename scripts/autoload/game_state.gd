@@ -48,8 +48,8 @@ var pending_events: Array = []  # events the player must answer today
 
 var storm_info: Dictionary = {}
 var daily_log: Array[String] = []
+var event_log: Array[Dictionary] = []  # single source of truth for day summary and end-screen hints
 var last_day_report: Dictionary = {}
-var history: Dictionary = {}  # facts about this run, used for the "what went wrong" hints
 
 var _res: Dictionary = {}  # working data between day-end steps
 
@@ -95,15 +95,34 @@ func reset_game() -> void:
 	pending_events.clear()
 	storm_info = {}
 	daily_log.clear()
+	event_log.clear()
 	last_day_report = {}
 	_res = {}
-	history = {
-		"forecast_days": [], "advice_days": [], "resupply_days": [], "experiments": 0,
-		"storms": [], "cuts": [], "oxygen_zero_days": [], "food_zero_days": [], "choices": {},
-	}
 	NasaData.reset_run()
 	_add_log("Mission Day 1 started! Walk to a room and press E (or click it) to use it.")
 	state_changed.emit()
+
+
+func _log_event(entry: Dictionary) -> void:
+	if not entry.has("day"):
+		entry["day"] = day
+	event_log.append(entry)
+
+
+func has_logged_action(action_id: String, on_day: int = -1) -> bool:
+	for entry in event_log:
+		if String(entry.get("type", "")) == "action" and String(entry.get("action", "")) == action_id:
+			if on_day < 0 or int(entry.get("day", -1)) == on_day:
+				return true
+	return false
+
+
+func get_day_events(day_no: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for entry in event_log:
+		if int(entry.get("day", -1)) == day_no:
+			out.append(entry)
+	return out
 
 
 func battery_max() -> int:
@@ -194,9 +213,9 @@ func coach_hint() -> String:
 		return "🚨 SOLAR STORM! Click the purple Radiation Shelter (bottom middle) and press HIDE IN SHELTER!"
 	if oxygen < 35 or meter_trend("oxygen") == "▼ Going down":
 		return "💡 Coach Tip: Oxygen is dropping! Click Life Support (top right) and set it to Normal or High."
-	if food < 25 and history["resupply_days"].is_empty() and day <= int(Rules.comms_data().get("resupply", {}).get("send_by_day", 6)):
+	if food < 25 and not has_logged_action("resupply") and day <= int(Rules.comms_data().get("resupply", {}).get("send_by_day", 6)):
 		return "💡 Coach Tip: Food is getting low! Visit the Communications Room (bottom right) to call a Food Supply Rocket."
-	if day in [2, 6, 8] and not history["forecast_days"].has(day) and ap >= 1 and not comms_blocked_today:
+	if day in [2, 6, 8] and not has_logged_action("forecast", day) and ap >= 1 and not comms_blocked_today:
 		return "💡 Coach Tip: Visit the Communications Room (bottom right) and Ask Earth for a Storm Forecast!"
 	if shield < Rules.max_value("shield") and ap >= 2 and battery >= 30:
 		return "💡 Coach Tip: You have spare energy! Visit the purple Radiation Shelter to Upgrade your Shield."
@@ -294,55 +313,57 @@ func try_action(action_id: String, param: Variant = null) -> bool:
 	battery = clampi(battery - power_cost, 0, battery_max())
 	var delay := int(Rules.comms_data().get("delay_days", 0)) + comms_extra_delay
 
+	var log_text := ""
 	match base_id:
 		"experiment":
 			var gain := int(spec.get("science", 0))
 			science += gain
-			history["experiments"] += 1
-			_add_log("Experiment done! +%d Science." % gain)
+			log_text = "Experiment done! +%d Science." % gain
 		"set_life_support":
 			life_support_mode = String(target_param)
-			_add_log("Life Support is now on %s." % life_support_mode.capitalize())
+			log_text = "Life Support is now on %s." % life_support_mode.capitalize()
 		"emergency_oxygen":
 			var o2_gain := int(spec.get("oxygen", 0))
 			oxygen = clampi(oxygen + o2_gain, 0, Rules.max_value("oxygen"))
-			_add_log("Emergency oxygen used! +%d Oxygen." % o2_gain)
+			log_text = "Emergency oxygen used! +%d Oxygen." % o2_gain
 		"set_greenhouse":
 			greenhouse_mode = String(target_param)
-			_add_log("Greenhouse is now %s." % greenhouse_mode.capitalize())
+			log_text = "Greenhouse is now %s." % greenhouse_mode.capitalize()
 		"upgrade_shield":
 			shield = clampi(shield + 1, 0, Rules.max_value("shield"))
 			effective_shield_today = shield
-			_add_log("Shield upgraded to level %d!" % shield)
+			log_text = "Shield upgraded to level %d!" % shield
 		"repair_pump":
 			if pump_fault_days > 0:
 				pump_fault_days = 0
 				pump_output_percent = 100
-				_add_log("Pump fixed! The Greenhouse works at full power again.")
+				log_text = "Pump fixed! The Greenhouse works at full power again."
 			else:
-				_add_log("The pump was checked. It works fine.")
+				log_text = "The pump was checked. It works fine."
 		"repair_panel":
 			if solar_penalty_days > 0:
 				solar_penalty_days = 0
 				solar_penalty_amount = 0
-				_add_log("Solar panels cleaned! They collect full sunlight again.")
+				log_text = "Solar panels cleaned! They collect full sunlight again."
 			else:
-				_add_log("The panels were checked. They are clean.")
+				log_text = "The panels were checked. They are clean."
 		"forecast":
-			history["forecast_days"].append(day)
 			pending_messages.append({"deliver_day": day + delay, "type": "forecast"})
-			_add_log("Forecast requested. It arrives on Day %d (messages take time)." % (day + delay))
+			log_text = "Forecast requested. It arrives on Day %d (messages take time)." % (day + delay)
 		"advice":
-			history["advice_days"].append(day)
 			pending_messages.append({"deliver_day": day + delay, "type": "advice"})
-			_add_log("You asked Mission Control for advice. The answer arrives on Day %d." % (day + delay))
+			log_text = "You asked Mission Control for advice. The answer arrives on Day %d." % (day + delay)
 		"resupply":
 			var res_type := String(target_param)
 			var amount := int(spec.get("options", {}).get(res_type, 0))
 			var arrival := day + int(spec.get("delay", 0)) + comms_extra_delay
-			history["resupply_days"].append(day)
 			pending_messages.append({"deliver_day": arrival, "type": "resupply", "resource": res_type, "amount": amount})
-			_add_log("Resupply ordered: +%d %s on Day %d." % [amount, res_type.capitalize(), arrival])
+			log_text = "Resupply ordered: +%d %s on Day %d." % [amount, res_type.capitalize(), arrival]
+	_add_log(log_text)
+	_log_event({
+		"day": day, "type": "action", "action": base_id, "param": target_param,
+		"ap": ap_cost, "power": power_cost, "text": log_text,
+	})
 	state_changed.emit()
 	return true
 
@@ -401,8 +422,14 @@ func choose_event(event_id: String, choice_id: String) -> bool:
 		var delay := int(Rules.comms_data().get("delay_days", 0)) + comms_extra_delay
 		pending_messages.append({"deliver_day": day + delay, "type": "reply", "text": String(fx["reply"])})
 
-	history["choices"][event_id] = choice_id
-	_add_log("%s: %s." % [EventManager.get_event(event_id).get("title", event_id), choice.get("label", choice_id)])
+	var ev_data := EventManager.get_event(event_id)
+	var choice_text := "%s: %s." % [ev_data.get("title", event_id), choice.get("label", choice_id)]
+	_add_log(choice_text)
+	_log_event({
+		"day": day, "type": "event_choice", "event_id": event_id, "choice_id": choice_id,
+		"title": String(ev_data.get("title", event_id)), "label": String(choice.get("label", choice_id)),
+		"effect": String(choice.get("effect", "")), "text": choice_text,
+	})
 	state_changed.emit()
 	return true
 
@@ -453,6 +480,7 @@ func _resolve_resources(advance: bool) -> void:
 		var msg := "Water was too low, so the Greenhouse went down to %s." % eff_gh.capitalize()
 		cuts.append(msg)
 		notes.append(msg)
+		_log_event({"day": day, "type": "water_cut", "mode": eff_gh, "text": msg})
 
 	# STEP 1: POWER. Pay in this order: base load, Life Support, shield upkeep, Greenhouse.
 	var dust := solar_penalty_amount if solar_penalty_days > 0 else 0
@@ -493,7 +521,7 @@ func _resolve_resources(advance: bool) -> void:
 			if msg != "":
 				cuts.append(msg)
 				notes.append(msg)
-				history["cuts"].append({"day": day, "text": msg, "step": String(cut_step)})
+				_log_event({"day": day, "type": "power_cut", "step": String(cut_step), "text": msg})
 			total = base_cost + ls_cost + shield_cost + gh_cost
 
 	effective_shield_today = eff_shield
@@ -542,6 +570,7 @@ func _resolve_resources(advance: bool) -> void:
 		var water_msg := "Water is getting low, so the Greenhouse went down to %s." % greenhouse_mode.capitalize()
 		cuts.append(water_msg)
 		notes.append(water_msg)
+		_log_event({"day": day, "type": "water_cut", "mode": greenhouse_mode, "text": water_msg})
 
 	_res = {
 		"before": before, "notes": notes, "cuts": cuts, "lines": lines, "advance": advance,
@@ -560,6 +589,7 @@ func resolve_storm(reached_shelter: bool) -> Dictionary:
 	var lockdown := false
 	var low_battery := false
 	var notes: Array[String] = _res["notes"]
+	var storm_note := ""
 
 	if reached_shelter:
 		var cost := int(cfg.get("lockdown_power", 0))
@@ -568,13 +598,15 @@ func resolve_storm(reached_shelter: bool) -> Dictionary:
 			factor = float(cfg.get("lockdown_factor", 1.0))
 			lockdown = true
 			_res["lines"]["battery"].append("Lockdown: -%d" % cost)
-			notes.append("Lockdown worked! The crew was safe in the shelter and took half the damage.")
+			storm_note = "Lockdown worked! The crew was safe in the shelter and took half the damage."
+			notes.append(storm_note)
 		else:
 			battery = 0
 			factor = float(cfg.get("lockdown_low_power_factor", 1.0))
 			low_battery = true
 			_res["lines"]["battery"].append("Lockdown used all the power left")
-			notes.append("The battery was too low for a full lockdown, so the shelter only helped a little.")
+			storm_note = "The battery was too low for a full lockdown, so the shelter only helped a little."
+			notes.append(storm_note)
 		# Lockdown pauses the greenhouse for the day: today's harvest is not made.
 		var crate_day: int = _res["crate_day"]
 		var lost: int = _res["crate_amount"]
@@ -582,17 +614,19 @@ func resolve_storm(reached_shelter: bool) -> Dictionary:
 			food_crates[crate_day] = maxi(0, int(food_crates[crate_day]) - lost)
 			notes.append("The Greenhouse was paused, so no harvest was made today.")
 	else:
-		notes.append("The crew did not reach the shelter in time, so they took full damage.")
+		storm_note = "The crew did not reach the shelter in time, so they took full damage."
+		notes.append(storm_note)
 
 	# Damage = ceil(base x (1 - shield_reduction x shield) x lockdown factor)
 	var raw := base * (1.0 - float(cfg.get("shield_reduction", 0.0)) * effective_shield_today) * factor
 	var damage := ceili(snappedf(raw, 0.000001))
 	_res["storm"] = {
-		"day": day, "severity": severity, "warned": bool(storm_info.get("warned", false)),
+		"day": day, "type": "storm", "severity": severity, "warned": bool(storm_info.get("warned", false)),
 		"reached_shelter": reached_shelter, "lockdown": lockdown, "low_battery": low_battery,
 		"shield": effective_shield_today, "damage": damage, "event_id": storm_info.get("event_id", ""),
+		"text": storm_note,
 	}
-	history["storms"].append(_res["storm"])
+	_log_event(_res["storm"].duplicate())
 	phase = PHASE_PLAYING
 	return _finish_day()
 
@@ -611,16 +645,18 @@ func _finish_day() -> Dictionary:
 		var o2_pen := int(penalties.get("oxygen_zero", 0))
 		health -= o2_pen
 		had_penalty = true
-		history["oxygen_zero_days"].append(resolved_day)
 		lines["health"].append("No oxygen: -%d" % o2_pen)
-		notes.append("The crew ran out of oxygen! Health dropped.")
+		var o2_msg := "The crew ran out of oxygen! Health dropped."
+		notes.append(o2_msg)
+		_log_event({"day": resolved_day, "type": "penalty", "resource": "oxygen", "damage": o2_pen, "text": o2_msg})
 	if food <= 0:
 		var food_pen := int(penalties.get("food_zero", 0))
 		health -= food_pen
 		had_penalty = true
-		history["food_zero_days"].append(resolved_day)
 		lines["health"].append("No food: -%d" % food_pen)
-		notes.append("The crew ran out of food! Health dropped.")
+		var food_msg := "The crew ran out of food! Health dropped."
+		notes.append(food_msg)
+		_log_event({"day": resolved_day, "type": "penalty", "resource": "food", "damage": food_pen, "text": food_msg})
 	if not storm.is_empty():
 		health -= int(storm["damage"])
 		lines["health"].append("Solar storm radiation: -%d" % int(storm["damage"]))
@@ -683,11 +719,13 @@ func _finish_day() -> Dictionary:
 		pending_events = EventManager.events_for_day(day)
 
 	last_day_report = {
+		"day": resolved_day, "type": "day_end",
 		"resolved_day": resolved_day, "battery": battery, "oxygen": oxygen, "food": food, "water": water,
 		"health": health, "shield": shield, "effective_shield_today": effective_shield_today,
 		"science": science, "cuts": _res["cuts"], "notes": notes, "messages": messages,
 		"meters": meters, "storm": storm, "game_over": game_over, "won": mission_won, "stars": stars_earned,
 	}
+	_log_event(last_day_report.duplicate(true))
 	_add_log("Day %d done: Battery %d, Oxygen %d, Food %d, Water %d, Health %d." % [
 		resolved_day, battery, oxygen, food, water, health])
 	for cut_text in _res["cuts"]:
@@ -706,7 +744,8 @@ func _deliver_messages(messages: Array[String], lines: Dictionary) -> void:
 			remaining.append(msg)
 			continue
 		var text := ""
-		match String(msg.get("type", "")):
+		var mtype := String(msg.get("type", ""))
+		match mtype:
 			"forecast":
 				# A forecast covers storms from the day it arrives until `delay_days` days later.
 				var storms := EventManager.storms_between(day, day + span)
@@ -739,6 +778,7 @@ func _deliver_messages(messages: Array[String], lines: Dictionary) -> void:
 				text = "A supply pod landed! +%d %s." % [amt, res.capitalize()]
 		messages.append(text)
 		_add_log(text)
+		_log_event({"day": day, "type": "message_delivered", "msg_type": mtype, "text": text})
 	pending_messages = remaining
 
 

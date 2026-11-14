@@ -232,7 +232,7 @@ script = ExtResource("1_astro")
 [node name="Visuals" type="Node2D" parent="." unique_id=2104070794]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visuals" unique_id=1732272302]
-texture_filter = 4
+texture_filter = 2
 position = Vector2(2.5, -10)
 scale = Vector2(0.14, 0.14)
 sprite_frames = SubResource("SpriteFrames_astro")
@@ -262,7 +262,7 @@ top_level = true
 z_index = 1
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="PetFollower" unique_id=1984723611]
-texture_filter = 4
+texture_filter = 2
 position = Vector2(34.8, 8.9)
 scale = Vector2(0.275, 0.275)
 sprite_frames = SubResource("SpriteFrames_pet")
@@ -274,6 +274,7 @@ shape = SubResource("RectangleShape2D_xfbqe")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=733349617]
 zoom = Vector2(2, 2)
+process_callback = 0
 limit_left = -552
 limit_top = -329
 limit_right = 2200

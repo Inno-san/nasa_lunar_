@@ -146,7 +146,7 @@ func _build_briefing_card(vbox: VBoxContainer) -> void:
 	fact_vbox.add_child(fact_title)
 
 	var fact_body := Label.new()
-	fact_body.text = String(_menu_fact.get("fact", "Astronauts study how plants and bodies adapt to space!"))
+	fact_body.text = String(_menu_fact.get("text", _menu_fact.get("fact", "Astronauts study how plants and bodies adapt to space!")))
 	fact_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fact_body.add_theme_font_size_override("font_size", 20)
 	fact_body.add_theme_color_override("font_color", COLOR_WHITE)
@@ -163,7 +163,7 @@ func _build_briefing_card(vbox: VBoxContainer) -> void:
 	src_row.add_child(src_prefix)
 
 	var src_link := LinkButton.new()
-	var sid := String(_menu_fact.get("study_id", "OSD-47"))
+	var sid := String(_menu_fact.get("id", _menu_fact.get("study_id", "OSD-804")))
 	var sdate := String(_menu_fact.get("date", "2015-05-19"))
 	var slink := String(_menu_fact.get("link", "https://osdr.nasa.gov/bio/repo"))
 	src_link.text = "NASA Open study page (%s, %s — Saved NASA data)" % [sid, sdate]

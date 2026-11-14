@@ -201,3 +201,24 @@ func _interact_and_stop(facility: Area2D = null) -> void:
 	velocity = Vector2.ZERO
 	if facility != null:
 		facility.request_interaction()
+
+
+func reset_to(spawn_pos: Vector2) -> void:
+	position = spawn_pos
+	velocity = Vector2.ZERO
+	has_click_target = false
+	pending_facility = null
+	facing_left = false
+	_was_moving = false
+	_stuck_timer = 0.0
+	_bob_time = 0.0
+	if anim_sprite != null:
+		anim_sprite.flip_h = false
+		anim_sprite.position.x = CHAR_CENTER_OFFSET_X
+		anim_sprite.play(&"idle")
+	if pet_sprite != null:
+		pet_sprite.flip_h = false
+		pet_sprite.position.x = PET_CELL_OFFSET.x
+		pet_sprite.play(&"default")
+	if pet_follower != null:
+		pet_follower.global_position = global_position + _get_pet_target_offset(0.0)

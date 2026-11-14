@@ -6,4 +6,4 @@ A top-down 2D lunar outpost game (Godot 4, web build) for ages 7-12: walk around
 NASA data: DONKI (storm scenarios), OSDR (fact cards). Cached data is labelled as saved data. Game values are simplified.
 See docs/ for mechanics, architecture and data sources.
 
-Team: TBD
+Team: Lunar Outpost: Mission 01 Team (Amr Akram / Inno-san, Abdelrhman Mohamed / Abdelrhman-Mohamedd)

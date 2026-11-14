@@ -154,7 +154,10 @@ func _show_next_pending_event() -> void:
 
 func _on_play_again() -> void:
 	GameState.reset_game()
-	astronaut.position = Vector2(364, 579)
+	if astronaut.has_method("reset_to"):
+		astronaut.reset_to(Vector2(364, 579))
+	else:
+		astronaut.position = Vector2(364, 579)
 	_sync_astronaut_lock()
 
 

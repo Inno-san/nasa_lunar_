@@ -15,30 +15,35 @@ const ROOM_META := {
 		"short": "SOLAR & BATTERY",
 		"color": Color(0.98, 0.76, 0.18, 1.0),
 		"accent": Color(1.0, 0.92, 0.45, 1.0),
+		"icon": "res://assets/art/building_power_station.png",
 	},
 	"life_support": {
 		"name": "LIFE SUPPORT",
 		"short": "OXYGEN GENERATOR",
 		"color": Color(0.22, 0.78, 0.98, 1.0),
 		"accent": Color(0.65, 0.95, 1.0, 1.0),
+		"icon": "res://assets/art/building_life_support.png",
 	},
 	"greenhouse": {
 		"name": "GREENHOUSE",
 		"short": "CROPS & WATER",
 		"color": Color(0.32, 0.88, 0.48, 1.0),
 		"accent": Color(0.72, 1.0, 0.78, 1.0),
+		"icon": "res://assets/art/building_greenhouse.png",
 	},
 	"radiation_shelter": {
 		"name": "SHELTER",
 		"short": "STORM SHIELD",
 		"color": Color(0.68, 0.38, 1.0, 1.0),
 		"accent": Color(0.88, 0.72, 1.0, 1.0),
+		"icon": "res://assets/art/building_radiation_shelter.png",
 	},
 	"comms_room": {
 		"name": "COMMS ROOM",
 		"short": "EARTH LINK",
 		"color": Color(0.38, 0.58, 1.0, 1.0),
 		"accent": Color(0.75, 0.85, 1.0, 1.0),
+		"icon": "res://assets/art/building_comms_room.png",
 	},
 }
 
@@ -250,13 +255,21 @@ func _draw_orb_emblem() -> void:
 		var a := 0.04 * float(7 - i)
 		orb_canvas.draw_circle(c, r, Color(col.r, col.g, col.b, a))
 
-	# Main planet/orb body
-	orb_canvas.draw_circle(c, 40.0, col.darkened(0.35))
+	# Main planet/orb backdrop
+	orb_canvas.draw_circle(c, 42.0, col.darkened(0.65))
+	orb_canvas.draw_arc(c, 43.0, 0.0, TAU, 48, UiKit.COLOR_BORDER, 2.0)
+
+	var icon_path := String(meta.get("icon", ""))
+	if icon_path != "" and ResourceLoader.exists(icon_path):
+		var tex: Texture2D = load(icon_path)
+		if tex != null:
+			var icon_size := Vector2(88, 88)
+			orb_canvas.draw_texture_rect(tex, Rect2(c - icon_size * 0.5, icon_size), false)
+			return
+
 	orb_canvas.draw_circle(c + Vector2(-5, -5), 34.0, col)
 	orb_canvas.draw_circle(c + Vector2(-12, -12), 20.0, acc)
 	orb_canvas.draw_circle(c + Vector2(-16, -16), 8.0, Color(1, 1, 1, 0.65))
-	# Crisp neon ring
-	orb_canvas.draw_arc(c, 41.0, 0.0, TAU, 48, UiKit.COLOR_BORDER, 2.0)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -352,11 +365,15 @@ func _build_sidebar() -> void:
 		row.add_theme_constant_override("separation", 8)
 		card.add_child(row)
 
-		var dot := ColorRect.new()
-		dot.custom_minimum_size = Vector2(22, 22)
-		dot.color = m["color"]
-		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(dot)
+		var icon_rect := TextureRect.new()
+		icon_rect.custom_minimum_size = Vector2(28, 28)
+		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var icon_path := String(m.get("icon", ""))
+		if icon_path != "" and ResourceLoader.exists(icon_path):
+			icon_rect.texture = load(icon_path)
+		row.add_child(icon_rect)
 
 		var col := VBoxContainer.new()
 		col.add_theme_constant_override("separation", 1)

@@ -5,6 +5,14 @@ extends Area2D
 signal interaction_requested(facility_id: String)
 signal facility_clicked(facility: Area2D)
 
+const BUILDING_ICONS := {
+	"power_station": "res://assets/art/building_power_station.png",
+	"life_support": "res://assets/art/building_life_support.png",
+	"greenhouse": "res://assets/art/building_greenhouse.png",
+	"radiation_shelter": "res://assets/art/building_radiation_shelter.png",
+	"comms_room": "res://assets/art/building_comms_room.png",
+}
+
 @export var facility_id: String = "power_station"
 @export var facility_title: String = "Power Station"
 @export var facility_subtitle: String = "Solar & Battery"
@@ -14,6 +22,7 @@ var astronaut_in_range: bool = false
 var mouse_hovered: bool = false
 
 @onready var box_fill: ColorRect = $Visuals/ConsoleFill
+@onready var building_sprite: Sprite2D = get_node_or_null("Visuals/BuildingSprite")
 @onready var title_label: Label = $Visuals/TitleLabel
 @onready var subtitle_label: Label = $Visuals/SubtitleLabel
 @onready var prompt_button: Button = $PromptButton
@@ -33,6 +42,10 @@ func _ready() -> void:
 func _apply_visuals() -> void:
 	if box_fill != null:
 		box_fill.color = facility_color
+	if building_sprite != null:
+		var icon_path: String = BUILDING_ICONS.get(facility_id, BUILDING_ICONS["power_station"])
+		if ResourceLoader.exists(icon_path):
+			building_sprite.texture = load(icon_path)
 	if title_label != null:
 		title_label.text = facility_title
 	if subtitle_label != null:

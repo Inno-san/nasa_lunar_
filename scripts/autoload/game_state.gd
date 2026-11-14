@@ -23,7 +23,6 @@ var science: int = 0
 var life_support_mode: String = "normal"
 var greenhouse_mode: String = "low"
 var effective_shield_today: int = 0
-var storm_occurred_today: bool = false
 
 var phase: String = PHASE_PLAYING
 var game_over: bool = false
@@ -71,7 +70,6 @@ func reset_game() -> void:
 	life_support_mode = "normal"
 	greenhouse_mode = "low"
 	effective_shield_today = shield
-	storm_occurred_today = false
 	phase = PHASE_PLAYING
 	game_over = false
 	mission_won = false
@@ -162,40 +160,23 @@ func meter_trend(key: String) -> String:
 			var cost := Rules.power_base_load() + _get_ls_cost(life_support_mode) \
 				+ shield * Rules.shield_upkeep_per_level() \
 				+ int(Rules.greenhouse_mode_data(greenhouse_mode).get("cost", 0))
-			var net := solar - cost
-			if net > 0:
-				return "▲ Going up"
-			if net < 0:
-				return "▼ Going down"
-			return "● Steady"
+			return _trend_text(solar - cost)
 		"oxygen":
 			var leak := oxygen_leak_amount if oxygen_leak_days > 0 else 0
-			var net := _get_ls_o2(life_support_mode) - Rules.consumption_oxygen() - leak
-			if net > 0:
-				return "▲ Going up"
-			if net < 0:
-				return "▼ Going down"
-			return "● Steady"
+			return _trend_text(_get_ls_o2(life_support_mode) - Rules.consumption_oxygen() - leak)
 		"food":
-			var arriving := int(food_crates.get(day, 0))
-			var net := arriving - Rules.consumption_food()
-			if net > 0:
-				return "▲ Going up"
-			if net < 0:
-				return "▼ Going down"
-			return "● Steady"
+			return _trend_text(int(food_crates.get(day, 0)) - Rules.consumption_food())
 		"water":
-			var net := Rules.water_recycle() - int(Rules.greenhouse_mode_data(greenhouse_mode).get("water", 0))
-			if net > 0:
-				return "▲ Going up"
-			if net < 0:
-				return "▼ Going down"
-			return "● Steady"
+			return _trend_text(Rules.water_recycle() - int(Rules.greenhouse_mode_data(greenhouse_mode).get("water", 0)))
 		"health":
-			if oxygen <= 0 or food <= 0:
-				return "▼ Danger!"
-			return "▲ Safe"
+			return "▼ Danger!" if oxygen <= 0 or food <= 0 else "▲ Safe"
 	return ""
+
+
+func _trend_text(net: int) -> String:
+	if net > 0:
+		return "▲ Going up"
+	return "▼ Going down" if net < 0 else "● Steady"
 
 
 ## Visual dots for Actions Left today (e.g. "● ● ● ● ○ ○").
@@ -454,7 +435,6 @@ func end_day(advance_to_next_day: bool = true) -> Dictionary:
 		"record": NasaData.storm_record(String(storm.get("id", ""))),
 	}
 	phase = PHASE_STORM
-	storm_occurred_today = true
 	_add_log("A %s solar storm is coming!" % storm_size_word(severity))
 	storm_started.emit(storm_info)
 	state_changed.emit()
@@ -487,42 +467,14 @@ func _resolve_resources(advance: bool) -> void:
 	var solar := maxi(0, Rules.power_solar() - dust)
 	var available := battery + solar
 	var base_cost := Rules.power_base_load()
-	var ls_cost := _get_ls_cost(eff_ls)
-	var shield_cost := eff_shield * Rules.shield_upkeep_per_level()
-	var gh_cost := int(Rules.greenhouse_mode_data(eff_gh).get("cost", 0))
-	var total := base_cost + ls_cost + shield_cost + gh_cost
-
-	if available < total:
-		for cut_step in Rules.shortage_order():
-			if available >= total:
-				break
-			var msg := ""
-			match String(cut_step):
-				"greenhouse":
-					if eff_gh != "off":
-						eff_gh = "off"
-						gh_cost = 0
-						msg = "Not enough power, so the base turned the Greenhouse off today."
-				"life_support_eco":
-					if eff_ls != "eco" and eff_ls != "off":
-						eff_ls = "eco"
-						ls_cost = _get_ls_cost("eco")
-						msg = "Still not enough power, so Life Support dropped to Eco today."
-				"shield_upkeep":
-					if eff_shield > 0:
-						eff_shield = 0
-						shield_cost = 0
-						msg = "Power was very low, so the Shield was switched off today (level 0 for storms)."
-				"life_support_off":
-					if eff_ls != "off":
-						eff_ls = "off"
-						ls_cost = 0
-						msg = "Power ran out! Life Support was switched off today."
-			if msg != "":
-				cuts.append(msg)
-				notes.append(msg)
-				_log_event({"day": day, "type": "power_cut", "step": String(cut_step), "text": msg})
-			total = base_cost + ls_cost + shield_cost + gh_cost
+	var power_state := _apply_power_cuts(available, base_cost, eff_ls, eff_shield, eff_gh, cuts, notes)
+	eff_ls = power_state["eff_ls"]
+	eff_shield = power_state["eff_shield"]
+	eff_gh = power_state["eff_gh"]
+	var ls_cost: int = power_state["ls_cost"]
+	var shield_cost: int = power_state["shield_cost"]
+	var gh_cost: int = power_state["gh_cost"]
+	var total: int = power_state["total"]
 
 	effective_shield_today = eff_shield
 	battery = clampi(available - total, 0, battery_max())
@@ -575,6 +527,58 @@ func _resolve_resources(advance: bool) -> void:
 	_res = {
 		"before": before, "notes": notes, "cuts": cuts, "lines": lines, "advance": advance,
 		"crate_day": crate_day, "crate_amount": gh_food, "storm": {}, "eff_ls": eff_ls, "eff_gh": eff_gh,
+	}
+
+
+func _apply_power_cuts(
+	available: int,
+	base_cost: int,
+	eff_ls: String,
+	eff_shield: int,
+	eff_gh: String,
+	cuts: Array[String],
+	notes: Array[String]
+) -> Dictionary:
+	var ls_cost := _get_ls_cost(eff_ls)
+	var shield_cost := eff_shield * Rules.shield_upkeep_per_level()
+	var gh_cost := int(Rules.greenhouse_mode_data(eff_gh).get("cost", 0))
+	var total := base_cost + ls_cost + shield_cost + gh_cost
+
+	if available < total:
+		for cut_step in Rules.shortage_order():
+			if available >= total:
+				break
+			var msg := ""
+			match String(cut_step):
+				"greenhouse":
+					if eff_gh != "off":
+						eff_gh = "off"
+						gh_cost = 0
+						msg = "Not enough power, so the base turned the Greenhouse off today."
+				"life_support_eco":
+					if eff_ls != "eco" and eff_ls != "off":
+						eff_ls = "eco"
+						ls_cost = _get_ls_cost("eco")
+						msg = "Still not enough power, so Life Support dropped to Eco today."
+				"shield_upkeep":
+					if eff_shield > 0:
+						eff_shield = 0
+						shield_cost = 0
+						msg = "Power was very low, so the Shield was switched off today (level 0 for storms)."
+				"life_support_off":
+					if eff_ls != "off":
+						eff_ls = "off"
+						ls_cost = 0
+						msg = "Power ran out! Life Support was switched off today."
+			if msg != "":
+				cuts.append(msg)
+				notes.append(msg)
+				_log_event({"day": day, "type": "power_cut", "step": String(cut_step), "text": msg})
+			total = base_cost + ls_cost + shield_cost + gh_cost
+
+	return {
+		"eff_ls": eff_ls, "eff_shield": eff_shield, "eff_gh": eff_gh,
+		"ls_cost": ls_cost, "shield_cost": shield_cost, "gh_cost": gh_cost, "total": total,
 	}
 
 
@@ -640,23 +644,9 @@ func _finish_day() -> Dictionary:
 
 	# STEP 6: HEALTH (penalties; otherwise +heal if there was no storm)
 	var penalties := Rules.penalties_data()
-	var had_penalty := false
-	if oxygen <= 0:
-		var o2_pen := int(penalties.get("oxygen_zero", 0))
-		health -= o2_pen
-		had_penalty = true
-		lines["health"].append("No oxygen: -%d" % o2_pen)
-		var o2_msg := "The crew ran out of oxygen! Health dropped."
-		notes.append(o2_msg)
-		_log_event({"day": resolved_day, "type": "penalty", "resource": "oxygen", "damage": o2_pen, "text": o2_msg})
-	if food <= 0:
-		var food_pen := int(penalties.get("food_zero", 0))
-		health -= food_pen
-		had_penalty = true
-		lines["health"].append("No food: -%d" % food_pen)
-		var food_msg := "The crew ran out of food! Health dropped."
-		notes.append(food_msg)
-		_log_event({"day": resolved_day, "type": "penalty", "resource": "food", "damage": food_pen, "text": food_msg})
+	var o2_pen := _apply_zero_penalty(oxygen <= 0, "oxygen", int(penalties.get("oxygen_zero", 0)), resolved_day, lines, notes)
+	var food_pen := _apply_zero_penalty(food <= 0, "food", int(penalties.get("food_zero", 0)), resolved_day, lines, notes)
+	var had_penalty := o2_pen or food_pen
 	if not storm.is_empty():
 		health -= int(storm["damage"])
 		lines["health"].append("Solar storm radiation: -%d" % int(storm["damage"]))
@@ -667,39 +657,8 @@ func _finish_day() -> Dictionary:
 			lines["health"].append("A calm day, the crew rested: +%d" % heal)
 	health = clampi(health, 0, Rules.max_value("health"))
 
-	# Win or loss
-	if health <= 0:
-		game_over = true
-		mission_won = false
-		stars_earned = 0
-		notes.append("Crew health reached 0. The mission ended. Let's try again!")
-	elif resolved_day >= Rules.mission_days():
-		game_over = true
-		var win_spec := Rules.win_data()
-		if health >= int(win_spec.get("min_health", 0)):
-			mission_won = true
-			stars_earned = 1
-			if health >= int(win_spec.get("two_stars_health", 0)):
-				stars_earned = 2
-				if science >= int(win_spec.get("three_stars_science", 0)):
-					stars_earned = 3
-		else:
-			mission_won = false
-			stars_earned = 0
-
-	# End-of-day countdowns for problems caused by events
-	if solar_penalty_days > 0:
-		solar_penalty_days -= 1
-		if solar_penalty_days == 0:
-			solar_penalty_amount = 0
-	if pump_fault_days > 0:
-		pump_fault_days -= 1
-		if pump_fault_days == 0:
-			pump_output_percent = 100
-	if oxygen_leak_days > 0:
-		oxygen_leak_days -= 1
-		if oxygen_leak_days == 0:
-			oxygen_leak_amount = 0
+	_evaluate_mission_end(resolved_day, notes)
+	_tick_event_timers()
 
 	var meters: Array = []
 	for key in METER_KEYS:
@@ -711,7 +670,6 @@ func _finish_day() -> Dictionary:
 	if bool(_res["advance"]) and not game_over:
 		day += 1
 		ap = Rules.ap_per_day()
-		storm_occurred_today = false
 		comms_blocked_today = false
 		comms_extra_delay = 0
 		effective_shield_today = shield
@@ -734,6 +692,60 @@ func _finish_day() -> Dictionary:
 	day_ended.emit(last_day_report)
 	state_changed.emit()
 	return last_day_report
+
+
+func _apply_zero_penalty(
+	is_zero: bool,
+	res_name: String,
+	pen_amount: int,
+	resolved_day: int,
+	lines: Dictionary,
+	notes: Array[String]
+) -> bool:
+	if not is_zero:
+		return false
+	health -= pen_amount
+	lines["health"].append("No %s: -%d" % [res_name, pen_amount])
+	var msg := "The crew ran out of %s! Health dropped." % res_name
+	notes.append(msg)
+	_log_event({"day": resolved_day, "type": "penalty", "resource": res_name, "damage": pen_amount, "text": msg})
+	return true
+
+
+func _evaluate_mission_end(resolved_day: int, notes: Array[String]) -> void:
+	if health <= 0:
+		game_over = true
+		mission_won = false
+		stars_earned = 0
+		notes.append("Crew health reached 0. The mission ended. Let's try again!")
+	elif resolved_day >= Rules.mission_days():
+		game_over = true
+		var win_spec := Rules.win_data()
+		if health >= int(win_spec.get("min_health", 0)):
+			mission_won = true
+			stars_earned = 1
+			if health >= int(win_spec.get("two_stars_health", 0)):
+				stars_earned = 2
+				if science >= int(win_spec.get("three_stars_science", 0)):
+					stars_earned = 3
+		else:
+			mission_won = false
+			stars_earned = 0
+
+
+func _tick_event_timers() -> void:
+	if solar_penalty_days > 0:
+		solar_penalty_days -= 1
+		if solar_penalty_days == 0:
+			solar_penalty_amount = 0
+	if pump_fault_days > 0:
+		pump_fault_days -= 1
+		if pump_fault_days == 0:
+			pump_output_percent = 100
+	if oxygen_leak_days > 0:
+		oxygen_leak_days -= 1
+		if oxygen_leak_days == 0:
+			oxygen_leak_amount = 0
 
 
 func _deliver_messages(messages: Array[String], lines: Dictionary) -> void:

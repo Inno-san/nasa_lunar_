@@ -55,9 +55,20 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _is_any_modal_open():
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var click_pos: Vector2 = get_global_mouse_position()
-		if click_pos.x >= 70.0 and click_pos.x <= 1210.0 and click_pos.y >= 105.0 and click_pos.y <= 600.0:
-			astronaut.walk_to_point(click_pos, null)
+		_handle_world_click(get_global_mouse_position())
+	elif event is InputEventScreenTouch and event.pressed:
+		_handle_world_click(get_global_mouse_position())
+
+
+func _handle_world_click(click_pos: Vector2) -> void:
+	for child in facilities_root.get_children():
+		if child is Area2D:
+			var rel: Vector2 = click_pos - child.global_position
+			if absf(rel.x) <= 110.0 and rel.y >= -140.0 and rel.y <= 80.0:
+				if child.has_method("_handle_click"):
+					child._handle_click()
+					return
+	astronaut.walk_to_point(click_pos, null)
 
 
 func _is_any_modal_open() -> bool:
@@ -98,7 +109,7 @@ func _on_hud_interact_pressed() -> void:
 	if dashboard_manager.visible:
 		dashboard_manager.close_dashboard()
 		return
-	if astronaut != null and not astronaut._nearby_facilities.is_empty():
+	if astronaut != null and not astronaut.nearby_facilities.is_empty():
 		astronaut.interact_with_nearest()
 	else:
 		var fallback_id: String = (
@@ -154,7 +165,7 @@ func _on_event_answered() -> void:
 
 func _on_play_again() -> void:
 	GameState.reset_game()
-	astronaut.position = Vector2(640, 345)
+	astronaut.position = Vector2(364, 579)
 	_sync_astronaut_lock()
 
 

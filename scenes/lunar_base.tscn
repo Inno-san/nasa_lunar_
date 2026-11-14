@@ -261,6 +261,7 @@ offset_left = -893.0
 offset_top = -403.0
 offset_right = 2251.0
 offset_bottom = 1759.0
+mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
 [node name="map_layout" type="Node2D" parent="." unique_id=1347997446]

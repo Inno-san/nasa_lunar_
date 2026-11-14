@@ -9,11 +9,15 @@ var nearby_facilities: Array[Area2D] = []
 var has_click_target: bool = false
 var click_target_pos: Vector2 = Vector2.ZERO
 var pending_facility: Area2D = null
+var _stuck_timer: float = 0.0
+
+@onready var walk_audio: AudioStreamPlayer = get_node_or_null("AudioStreamPlayer")
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if movement_locked:
 		velocity = Vector2.ZERO
+		_update_walk_sound(false)
 		move_and_slide()
 		return
 
@@ -26,6 +30,7 @@ func _physics_process(_delta: float) -> void:
 		# Manual keyboard/D-pad input cancels any cursor auto-walk target
 		has_click_target = false
 		pending_facility = null
+		_stuck_timer = 0.0
 		velocity = input_dir * walk_speed
 	elif has_click_target:
 		var to_target := click_target_pos - global_position
@@ -46,7 +51,32 @@ func _physics_process(_delta: float) -> void:
 			velocity = to_target.normalized() * walk_speed
 	else:
 		velocity = Vector2.ZERO
+
 	move_and_slide()
+
+	if has_click_target and get_slide_collision_count() > 0 and get_real_velocity().length() < 20.0:
+		_stuck_timer += delta
+		if _stuck_timer >= 0.25:
+			has_click_target = false
+			pending_facility = null
+			velocity = Vector2.ZERO
+			_stuck_timer = 0.0
+	else:
+		_stuck_timer = 0.0
+
+	var is_moving := velocity.length() > 5.0 and get_real_velocity().length() > 5.0
+	_update_walk_sound(is_moving)
+
+
+func _update_walk_sound(is_moving: bool) -> void:
+	if walk_audio == null:
+		return
+	if is_moving and not movement_locked and not AudioManager.muted:
+		if not walk_audio.playing:
+			walk_audio.play()
+	else:
+		if walk_audio.playing:
+			walk_audio.stop()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -104,3 +134,4 @@ func walk_to_point(world_pos: Vector2, target_facility: Area2D = null) -> void:
 	click_target_pos = world_pos
 	pending_facility = target_facility
 	has_click_target = true
+	_stuck_timer = 0.0

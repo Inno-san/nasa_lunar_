@@ -142,6 +142,13 @@ func _run_checks() -> void:
 	var base_scene: PackedScene = load("res://scenes/lunar_base.tscn")
 	var base_inst := base_scene.instantiate()
 	root.add_child(base_inst)
+	var astro: CharacterBody2D = base_inst.get_node("Astronaut")
+	_check(astro.walk_audio != null, "Expected Astronaut AudioStreamPlayer walk_audio to exist")
+	base_inst._handle_world_click(Vector2(500, 500))
+	_check(astro.has_click_target == true, "Expected click on floor to set has_click_target=true")
+	var pwr: Area2D = base_inst.get_node("Facilities/PowerStation")
+	base_inst._handle_world_click(pwr.global_position)
+	_check(astro.pending_facility == pwr, "Expected click on PowerStation to set pending_facility=PowerStation")
 	var dm: Control = base_inst.get_node("CanvasLayer/DashboardManager")
 	for fid in ["power_station", "life_support", "greenhouse", "radiation_shelter", "comms_room"]:
 		dm.open_dashboard(fid)

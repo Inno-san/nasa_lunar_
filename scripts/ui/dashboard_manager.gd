@@ -15,35 +15,30 @@ const ROOM_META := {
 		"short": "SOLAR & BATTERY",
 		"color": Color(0.98, 0.76, 0.18, 1.0),
 		"accent": Color(1.0, 0.92, 0.45, 1.0),
-		"terms": ["battery"],
 	},
 	"life_support": {
 		"name": "LIFE SUPPORT",
 		"short": "OXYGEN GENERATOR",
 		"color": Color(0.22, 0.78, 0.98, 1.0),
 		"accent": Color(0.65, 0.95, 1.0, 1.0),
-		"terms": ["oxygen"],
 	},
 	"greenhouse": {
 		"name": "GREENHOUSE",
 		"short": "CROPS & WATER",
 		"color": Color(0.32, 0.88, 0.48, 1.0),
 		"accent": Color(0.72, 1.0, 0.78, 1.0),
-		"terms": ["greenhouse"],
 	},
 	"radiation_shelter": {
 		"name": "SHELTER",
 		"short": "STORM SHIELD",
 		"color": Color(0.68, 0.38, 1.0, 1.0),
 		"accent": Color(0.88, 0.72, 1.0, 1.0),
-		"terms": ["shielding", "radiation", "solar_storm"],
 	},
 	"comms_room": {
 		"name": "COMMS ROOM",
 		"short": "EARTH LINK",
 		"color": Color(0.38, 0.58, 1.0, 1.0),
 		"accent": Color(0.75, 0.85, 1.0, 1.0),
-		"terms": ["comm_delay"],
 	},
 }
 
@@ -53,8 +48,6 @@ var current_facility_id: String = "power_station"
 var current_top_tab: String = "operations"
 var current_sub_tab: String = "controls"
 
-var backdrop: ColorRect
-var main_root: Control
 var top_tabs_box: HBoxContainer
 var sidebar_list: VBoxContainer
 var orb_canvas: Control
@@ -63,7 +56,6 @@ var resources_title_label: Label
 var resources_list: VBoxContainer
 var sub_tabs_box: HBoxContainer
 var table_headers: HBoxContainer
-var rows_scroll: ScrollContainer
 var rows_vbox: VBoxContainer
 
 
@@ -75,13 +67,13 @@ func _ready() -> void:
 
 
 func _build_ui() -> void:
-	backdrop = ColorRect.new()
+	var backdrop := ColorRect.new()
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	backdrop.color = Color(0.02, 0.01, 0.06, 0.72)
 	backdrop.gui_input.connect(_on_backdrop_input)
 	add_child(backdrop)
 
-	main_root = Control.new()
+	var main_root := Control.new()
 	main_root.anchor_left = 0.5
 	main_root.anchor_right = 0.5
 	main_root.anchor_top = 0.5
@@ -92,7 +84,6 @@ func _build_ui() -> void:
 	main_root.offset_bottom = 265.0
 	add_child(main_root)
 
-	# 1. Top Trapezoid/Chamfered Tab Header (above the main window frame)
 	var tab_frame := PanelContainer.new()
 	tab_frame.offset_left = 135.0
 	tab_frame.offset_right = 805.0
@@ -106,7 +97,6 @@ func _build_ui() -> void:
 	top_tabs_box.add_theme_constant_override("separation", 36)
 	tab_frame.add_child(top_tabs_box)
 
-	# 2. Outer + Inner Double Neon-Purple Chamfered Window Frame
 	var outer_panel := PanelContainer.new()
 	outer_panel.offset_left = 0.0
 	outer_panel.offset_right = 940.0
@@ -119,18 +109,27 @@ func _build_ui() -> void:
 	inner_panel.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_PANEL, UiKit.COLOR_BORDER_DIM, 14, 10, 2))
 	outer_panel.add_child(inner_panel)
 
-	# Circular '✕' Close button in the top-right corner of the frame
 	var close_btn := UiKit.close_circle_button()
 	close_btn.position = Vector2(920, 24)
 	close_btn.pressed.connect(close_dashboard)
 	main_root.add_child(close_btn)
 
-	# 3. Inside Inner Panel: Left Sidebar + Right Main Content
 	var body_hbox := HBoxContainer.new()
 	body_hbox.add_theme_constant_override("separation", 18)
 	inner_panel.add_child(body_hbox)
 
-	# --- LEFT SIDEBAR ("ALL ROOMS") ---
+	_build_sidebar_frame(body_hbox)
+
+	var right_vbox := VBoxContainer.new()
+	right_vbox.add_theme_constant_override("separation", 10)
+	right_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body_hbox.add_child(right_vbox)
+
+	_build_top_status_section(right_vbox)
+	_build_bottom_table_section(right_vbox)
+
+
+func _build_sidebar_frame(body_hbox: HBoxContainer) -> void:
 	var sidebar_frame := PanelContainer.new()
 	sidebar_frame.custom_minimum_size = Vector2(185, 0)
 	sidebar_frame.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_BG_DEEP, UiKit.COLOR_BORDER, 8, 8, 2))
@@ -157,13 +156,8 @@ func _build_ui() -> void:
 	sidebar_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	side_vbox.add_child(sidebar_list)
 
-	# --- RIGHT MAIN CONTENT ---
-	var right_vbox := VBoxContainer.new()
-	right_vbox.add_theme_constant_override("separation", 10)
-	right_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body_hbox.add_child(right_vbox)
 
-	# Top Half: Glowing Orb Emblem (left) + Resources Sub-panel (right)
+func _build_top_status_section(right_vbox: VBoxContainer) -> void:
 	var top_half := HBoxContainer.new()
 	top_half.add_theme_constant_override("separation", 18)
 	top_half.custom_minimum_size = Vector2(0, 185)
@@ -206,7 +200,8 @@ func _build_ui() -> void:
 	resources_list.add_theme_constant_override("separation", 6)
 	res_vbox.add_child(resources_list)
 
-	# Middle Sub-Tab Bar ("CONTROLS" | "SCIENCE WORDS")
+
+func _build_bottom_table_section(right_vbox: VBoxContainer) -> void:
 	var sub_tab_row := HBoxContainer.new()
 	sub_tab_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	right_vbox.add_child(sub_tab_row)
@@ -219,7 +214,6 @@ func _build_ui() -> void:
 	sub_tabs_box.add_theme_constant_override("separation", 28)
 	sub_tab_frame.add_child(sub_tabs_box)
 
-	# Bottom Half: Chamfered Action Rows Table
 	var table_panel := PanelContainer.new()
 	table_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	table_panel.add_theme_stylebox_override("panel", UiKit.panel_style(UiKit.COLOR_BG_DEEP, UiKit.COLOR_BORDER, 12, 10, 2))
@@ -233,7 +227,7 @@ func _build_ui() -> void:
 	table_headers.add_theme_constant_override("separation", 8)
 	table_vbox.add_child(table_headers)
 
-	rows_scroll = ScrollContainer.new()
+	var rows_scroll := ScrollContainer.new()
 	rows_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	rows_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	table_vbox.add_child(rows_scroll)
@@ -274,7 +268,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_backdrop_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	if UiKit.is_left_click(event):
 		close_dashboard()
 
 
@@ -310,6 +304,17 @@ func _refresh_contents() -> void:
 	_build_rows(meta)
 
 
+func _add_flat_tab(parent: Container, label_txt: String, font_size: int, is_sel: bool, on_press: Callable) -> Button:
+	var btn := Button.new()
+	btn.flat = true
+	btn.text = label_txt
+	btn.add_theme_font_size_override("font_size", font_size)
+	btn.add_theme_color_override("font_color", UiKit.COLOR_TEXT if is_sel else UiKit.COLOR_MUTED)
+	btn.pressed.connect(on_press)
+	parent.add_child(btn)
+	return btn
+
+
 func _build_top_tabs() -> void:
 	UiKit.clear_children(top_tabs_box)
 	for tab_def in [
@@ -319,19 +324,11 @@ func _build_top_tabs() -> void:
 		["statistics", "BASE LOG"],
 	]:
 		var tid: String = tab_def[0]
-		var tlabel: String = tab_def[1]
-		var btn := Button.new()
-		btn.flat = true
-		btn.text = tlabel
-		btn.add_theme_font_size_override("font_size", 16)
-		var is_sel := (current_top_tab == tid)
-		btn.add_theme_color_override("font_color", UiKit.COLOR_TEXT if is_sel else UiKit.COLOR_MUTED)
-		btn.add_theme_color_override("font_hover_color", UiKit.COLOR_GOLD_HOVER)
-		btn.pressed.connect(func() -> void:
+		var btn := _add_flat_tab(top_tabs_box, tab_def[1], 16, current_top_tab == tid, func() -> void:
 			current_top_tab = tid
 			_refresh_contents()
 		)
-		top_tabs_box.add_child(btn)
+		btn.add_theme_color_override("font_hover_color", UiKit.COLOR_GOLD_HOVER)
 
 
 func _build_sidebar() -> void:
@@ -345,7 +342,7 @@ func _build_sidebar() -> void:
 		var brd := UiKit.COLOR_GOLD if is_sel else UiKit.COLOR_BORDER_DIM
 		card.add_theme_stylebox_override("panel", UiKit.panel_style(bg, brd, 8, 6, 1))
 		card.gui_input.connect(func(ev: InputEvent) -> void:
-			if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT and ev.pressed:
+			if UiKit.is_left_click(ev):
 				current_facility_id = fid
 				current_top_tab = "operations"
 				_refresh_contents()
@@ -398,9 +395,7 @@ func _build_resources_panel(meta: Dictionary) -> void:
 	_add_res_line("🫧", Color(0.3, 0.85, 1.0), "OXYGEN", "%s  (%s)" % [GameState.meter_word("oxygen").to_upper(), GameState.meter_trend("oxygen").to_upper()])
 	_add_res_line("🌱", Color(0.4, 0.92, 0.5), "FOOD", "%s  (GREENHOUSE: %s)" % [GameState.meter_word("food").to_upper(), GameState.greenhouse_mode.to_upper()])
 	_add_res_line("💧", Color(0.45, 0.68, 1.0), "WATER", "%s  (%s)" % [GameState.meter_word("water").to_upper(), GameState.meter_trend("water").to_upper()])
-	var sh_stars := ""
-	for i in range(Rules.max_value("shield")):
-		sh_stars += "★" if i < GameState.shield else "☆"
+	var sh_stars := UiKit.stars(GameState.shield, Rules.max_value("shield"))
 	_add_res_line("🛡️", Color(0.75, 0.5, 1.0), "SHIELD & HEALTH", "SHIELD %s  |  HEALTH (%s)" % [sh_stars, GameState.meter_word("health").to_upper()])
 
 
@@ -422,18 +417,10 @@ func _build_sub_tabs(_meta: Dictionary) -> void:
 		["glossary", "SCIENCE WORDS (?)"],
 	]:
 		var sid: String = st[0]
-		var slabel: String = st[1]
-		var btn := Button.new()
-		btn.flat = true
-		btn.text = slabel
-		btn.add_theme_font_size_override("font_size", 15)
-		var is_sel := (current_sub_tab == sid)
-		btn.add_theme_color_override("font_color", UiKit.COLOR_TEXT if is_sel else UiKit.COLOR_MUTED)
-		btn.pressed.connect(func() -> void:
+		_add_flat_tab(sub_tabs_box, st[1], 15, current_sub_tab == sid, func() -> void:
 			current_sub_tab = sid
 			_refresh_contents()
 		)
-		sub_tabs_box.add_child(btn)
 
 
 func _build_rows(_meta: Dictionary) -> void:
